@@ -1,0 +1,3 @@
+[submodule "catkin_ws/src/POLARIS_GEM_e2"]
+	path = catkin_ws/src/POLARIS_GEM_e2
+	url = https://gitlab.engr.illinois.edu/gemillins/POLARIS_GEM_e2.git
