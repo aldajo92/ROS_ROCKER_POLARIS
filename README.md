@@ -100,11 +100,6 @@ Disclaimer: This process require to run with parallels desktop app which is a pa
     $ ./scripts/run_nvidia # If you have nvidia graphics card configured with docker
     ```
 
-You should see something as follows:
-![](.media/ubuntu_running_ros.png)
-
-The above image has a configuration in the OS for the display with a resolution 2048x1152(16:9).
-
 
 ## Autor ##
 Alejandro Daniel Jose Gómez Flórez - @aldajo92
