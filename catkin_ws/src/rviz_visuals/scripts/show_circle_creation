@@ -1,56 +1,64 @@
 #!/usr/bin/env python3
 import rospy
+from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
 import math
 
-def publish_circle():
-    # Initialize ROS node
-    rospy.init_node('circle_pose_publisher', anonymous=True)
+def publish_path():
+    # Initialize the ROS node
+    rospy.init_node('circle_path_publisher', anonymous=True)
     
-    # Create a publisher for PoseStamped
-    pub = rospy.Publisher('/circle_pose', PoseStamped, queue_size=10)
+    # Create a publisher for the Path message
+    pub = rospy.Publisher('/circle_path', Path, queue_size=10)
     
-    # Define the rate at which to publish the message
+    # Set the rate of publishing
     rate = rospy.Rate(10)  # 10 Hz
     
-    # Define parameters for the circle
-    radius = 1.0  # Radius of the circle
-    center_x, center_y = 0.0, 0.0  # Center of the circle
-    angular_velocity = 0.1  # Angular velocity (radians per second)
+    # Create a Path message
+    path = Path()
+    path.header.frame_id = "map"  # Change if necessary
     
+    # Define circle parameters
+    radius = 1.0
+    center_x, center_y = 0.0, 0.0
+    angular_velocity = 0.1
     start_time = rospy.get_time()
-    
+
     while not rospy.is_shutdown():
-        # Calculate the current time
+        # Calculate elapsed time
         current_time = rospy.get_time()
         elapsed_time = current_time - start_time
         
-        # Calculate the x and y position on the circle
+        # Calculate position on the circle
         x = center_x + radius * math.cos(angular_velocity * elapsed_time)
         y = center_y + radius * math.sin(angular_velocity * elapsed_time)
         
         # Create a PoseStamped message
         pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
-        pose.header.frame_id = "map"  # Change if needed
+        pose.header.frame_id = "map"  # Adjust if needed
         pose.pose.position.x = x
         pose.pose.position.y = y
         pose.pose.position.z = 0.0
         
-        # Orientation (optional: keeping it identity quaternion for simplicity)
+        # Orientation (optional, using identity quaternion)
         pose.pose.orientation.x = 0.0
         pose.pose.orientation.y = 0.0
         pose.pose.orientation.z = 0.0
         pose.pose.orientation.w = 1.0
         
-        # Publish the PoseStamped message
-        pub.publish(pose)
+        # Add the PoseStamped to the path
+        path.poses.append(pose)
+        path.header.stamp = rospy.Time.now()
         
-        # Sleep to maintain the loop rate
+        # Publish the Path message
+        pub.publish(path)
+        
+        # Sleep to maintain loop rate
         rate.sleep()
 
 if __name__ == '__main__':
     try:
-        publish_circle()
+        publish_path()
     except rospy.ROSInterruptException:
         pass

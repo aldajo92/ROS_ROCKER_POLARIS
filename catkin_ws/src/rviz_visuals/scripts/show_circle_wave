@@ -43,10 +43,10 @@ def create_circle_path(radius):
 
 def publish_circle_path():
     # Initialize the ROS node
-    rospy.init_node('circle_path_publisher', anonymous=True)
+    rospy.init_node('circle_wave_publisher', anonymous=True)
     
     # Create a publisher for the Path message
-    pub = rospy.Publisher('/circle_path', Path, queue_size=10)
+    pub = rospy.Publisher('/circle_wave', Path, queue_size=10)
     
     # Set the rate for the loop (adjust if necessary)
     rate = rospy.Rate(50)  # 10 Hz, publish once per second
