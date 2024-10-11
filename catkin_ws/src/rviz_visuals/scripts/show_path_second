@@ -56,7 +56,7 @@ def publish_circle_path():
     
     while not rospy.is_shutdown():
         # Create the circular path for the current radius
-        path = create_circle_path(radius=1.0)
+        path = create_circle_path(radius=radius)
         
         # Update the header timestamp for the Path
         path.header.stamp = rospy.Time.now()

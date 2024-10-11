@@ -1,0 +1,8 @@
+
+<launch>
+  <!-- Launch RViz -->
+  <node pkg="rviz" type="rviz" name="rviz" output="screen" args="-d $(find rviz_visuals)/rviz/visuals.rviz" />
+
+  <!-- Run the show_path_second node -->
+  <node pkg="rviz_visuals" type="show_path_second" name="show_path_second" output="screen" />
+</launch>
