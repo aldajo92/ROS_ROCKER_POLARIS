@@ -16,10 +16,10 @@ def publish_path():
     
     # Create a Path message
     path = Path()
-    path.header.frame_id = "map"  # Change if necessary
+    path.header.frame_id = "base_footprint"  # Change if necessary
     
     # Define circle parameters
-    radius = 1.0
+    radius = 7.0
     center_x, center_y = 0.0, 0.0
     angular_velocity = 0.1
     start_time = rospy.get_time()
@@ -36,7 +36,7 @@ def publish_path():
         # Create a PoseStamped message
         pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
-        pose.header.frame_id = "map"  # Adjust if needed
+        pose.header.frame_id = "base_footprint"  # Adjust if needed
         pose.pose.position.x = x
         pose.pose.position.y = y
         pose.pose.position.z = 0.0

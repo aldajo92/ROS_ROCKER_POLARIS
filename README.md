@@ -100,6 +100,10 @@ Disclaimer: This process require to run with parallels desktop app which is a pa
     $ ./scripts/run_nvidia # If you have nvidia graphics card configured with docker
     ```
 
+6. Run project:
+```
+roslaunch gem_gazebo gem_gazebo_rviz.launch velodyne_points:="true"
+```
 
 ## Autor ##
 Alejandro Daniel Jose Gómez Flórez - @aldajo92

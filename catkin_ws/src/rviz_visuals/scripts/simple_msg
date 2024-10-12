@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+import rospy
+from geometry_msgs.msg import Twist
+from ackermann_msgs.msg import AckermannDrive
+
+# Callback for /gem/cmd_vel messages
+def cmd_vel_callback(msg):
+    rospy.loginfo(f"Received cmd_vel:\nLinear: {msg.linear.x}, {msg.linear.y}, {msg.linear.z}\n"
+                  f"Angular: {msg.angular.x}, {msg.angular.y}, {msg.angular.z}")
+
+# Callback for /gem/ackermann_cmd messages
+def ackermann_cmd_callback(msg):
+    rospy.loginfo(f"Received ackermann_cmd:\nSteering angle: {msg.steering_angle}, "
+                  f"Steering angle velocity: {msg.steering_angle_velocity}\n"
+                  f"Speed: {msg.speed}, Acceleration: {msg.acceleration}, Jerk: {msg.jerk}")
+
+# Function to publish test cmd_vel messages
+def publish_cmd_vel(pub):
+    # Create a Twist message
+    cmd_vel_msg = Twist()
+    
+    # Set linear and angular velocities
+    cmd_vel_msg.linear.x = 1.0  # Move forward with 1 m/s
+    cmd_vel_msg.angular.z = 0.5  # Rotate with 0.5 rad/s
+    
+    # Publish the message
+    rospy.loginfo("Publishing cmd_vel message")
+    pub.publish(cmd_vel_msg)
+
+def listener_and_publisher():
+    rospy.init_node('cmd_vel_ackermann_listener_publisher', anonymous=True)
+
+    # Publisher to /gem/cmd_vel topic
+    cmd_vel_pub = rospy.Publisher('/gem/cmd_vel', Twist, queue_size=10)
+
+    # Subscribers
+    rospy.Subscriber('/gem/cmd_vel', Twist, cmd_vel_callback)
+    rospy.Subscriber('/gem/ackermann_cmd', AckermannDrive, ackermann_cmd_callback)
+
+    # Set loop rate
+    rate = rospy.Rate(1)  # 1 Hz
+
+    # Main loop to publish cmd_vel messages
+    while not rospy.is_shutdown():
+        publish_cmd_vel(cmd_vel_pub)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        listener_and_publisher()
+    except rospy.ROSInterruptException:
+        pass
