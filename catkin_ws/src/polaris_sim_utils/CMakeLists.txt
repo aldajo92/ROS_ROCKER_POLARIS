@@ -162,6 +162,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/gps_path
   scripts/gps_path_sin
+  scripts/waypoints_publisher
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

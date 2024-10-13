@@ -1,0 +1,50 @@
+import rospy
+import csv
+from nav_msgs.msg import Path
+from geometry_msgs.msg import PoseStamped
+
+def read_waypoints(file_path):
+    waypoints = []
+    with open(file_path, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if len(row) >= 2:  # Ensure there are at least x and y coordinates
+                x, y = float(row[0]), float(row[1])
+                waypoints.append((x, y))
+    return waypoints
+
+def waypoints_to_path(waypoints, frame_id):
+    path = Path()
+    path.header.frame_id = frame_id
+    for x, y in waypoints:
+        pose = PoseStamped()
+        pose.header.frame_id = frame_id
+        pose.pose.position.x = x
+        pose.pose.position.y = y
+        pose.pose.position.z = 0
+        pose.pose.orientation.w = 1.0  # Assuming no orientation
+        path.poses.append(pose)
+    return path
+
+def main():
+    rospy.init_node('waypoints_publisher')
+    waypoints_file = rospy.get_param('~waypoints_file', '/catkin_ws/src/POLARIS_GEM_e2/polaris_gem_drivers_sim/gem_pure_pursuit_sim/waypoints/wps.csv')
+    frame_id = rospy.get_param('~frame_id', 'base_footprint')  # Replace 'base_link' with the actual frame ID
+    waypoints = read_waypoints(waypoints_file)
+    path = waypoints_to_path(waypoints, frame_id)
+    
+    path_pub = rospy.Publisher('/gps_path', Path, queue_size=10)
+    rate = rospy.Rate(1)  # 1 Hz
+
+    while not rospy.is_shutdown():
+        path.header.stamp = rospy.Time.now()
+        for pose in path.poses:
+            pose.header.stamp = rospy.Time.now()
+        path_pub.publish(path)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
