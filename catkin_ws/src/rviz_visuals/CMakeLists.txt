@@ -115,6 +115,20 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+<<<<<<< Updated upstream
+=======
+## Declare a C++ executable
+# add_executable(controller_node src/controller.cpp)
+
+## Add cmake target dependencies of the executable
+# add_dependencies(controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+## Specify libraries to link the executable target against
+# target_link_libraries(controller_node
+#   ${catkin_LIBRARIES}
+# )
+
+>>>>>>> Stashed changes
 #############
 ## Install ##
 #############
@@ -127,6 +141,14 @@ catkin_install_python(PROGRAMS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+<<<<<<< Updated upstream
+=======
+## Mark executables for installation
+# install(TARGETS controller_node
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+
+>>>>>>> Stashed changes
 #############
 ## Testing ##
 #############
