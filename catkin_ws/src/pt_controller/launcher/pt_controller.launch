@@ -1,3 +1,3 @@
 <launch>
-  <node pkg="pt_controller" type="pursuit_controller_node" name="pursuit_controller_node" output="screen" args="-d $(find pt_controller)/pt_controller/pursuit_controller_node" />
+  <node pkg="pt_controller" type="pursuit_controller_node" name="pursuit_controller_node" output="screen" />
 </launch>
