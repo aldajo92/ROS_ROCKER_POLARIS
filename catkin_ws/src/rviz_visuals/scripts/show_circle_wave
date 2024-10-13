@@ -7,7 +7,7 @@ import math
 def create_circle_path(radius):
     # Create a Path message
     path = Path()
-    path.header.frame_id = "base_footprint"  # Adjust the frame if necessary
+    path.header.frame_id = "map"  # Adjust the frame if necessary
 
     # Define circle parameters
     center_x, center_y = 0.0, 0.0  # Center of the circle
@@ -67,7 +67,7 @@ def publish_circle_path():
         # Increment the radius for the next iteration
         radius += 0.05  # Increase radius for the next circle
 
-        if radius > 50.0:
+        if radius > 5.0:
             radius = 0.5
 
         # Sleep to maintain the loop rate

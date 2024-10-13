@@ -14,8 +14,11 @@ RUN apt update && apt-get install -y \
 RUN apt update && apt-get install -y \
   ros-noetic-rqt-plot
 
-COPY ./autostart.sh /
-RUN chmod +x /autostart.sh
+ENV ROS_DISTRO=noetic
+ENV WS=/catkin_ws
+
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "alias sros='source /opt/ros/${ROS_DISTRO}/setup.bash ; source ${WS}/devel/setup.bash'" >> ~/.bashrc
+RUN echo "alias bros='cd ${WS} && catkin build'" >> ~/.bashrc
 
 ENTRYPOINT ["/ros_entrypoint.sh"]
- 
