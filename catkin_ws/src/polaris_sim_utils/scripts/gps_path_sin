@@ -7,7 +7,7 @@ from geometry_msgs.msg import Quaternion
 class PathPublisher:
     def __init__(self):
         # Initialize the ROS node
-        rospy.init_node('path_publisher', anonymous=True)
+        rospy.init_node('gps_path_sin_publisher', anonymous=True)
         
         # Publisher for the path
         self.path_pub = rospy.Publisher('/gps_path', Path, queue_size=10)
