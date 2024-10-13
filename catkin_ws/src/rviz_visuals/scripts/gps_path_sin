@@ -1,0 +1,95 @@
+import rospy
+import math
+from nav_msgs.msg import Path
+from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Quaternion
+
+class PathPublisher:
+    def __init__(self):
+        # Initialize the ROS node
+        rospy.init_node('path_publisher', anonymous=True)
+        
+        # Publisher for the path
+        self.path_pub = rospy.Publisher('/gps_path', Path, queue_size=10)
+        
+        # Generate waypoints
+        self.path = self.generate_path()
+        
+        # Timer to publish the path at a fixed rate
+        self.timer = rospy.Timer(rospy.Duration(5), self.publish_path)
+
+    def generate_path(self):
+        # Create a Path message
+        path = Path()
+        path.header.frame_id = "base_footprint"  # Set the reference frame
+        
+        # Parameters for the sinusoidal path
+        amplitude = 2.0     # Amplitude of the sine wave
+        wavelength = 10.0   # Wavelength of the sine wave
+        num_points = 100    # Number of waypoints
+        x_start = 0.0       # Starting x position
+        x_end = 60.0        # Ending x position
+        x_step = (x_end - x_start) / num_points  # Step size for x
+
+        # Create a sinusoidal path
+        for i in range(num_points + 1):
+            pose = PoseStamped()
+            pose.header.frame_id = "base_footprint"  # Use the same fixed frame
+            pose.header.stamp = rospy.Time.now()
+
+            # X coordinate
+            x = x_start + i * x_step
+            # Y coordinate as a sine function of x
+            y = amplitude * math.sin((2 * math.pi / wavelength) * x)
+
+            # Set position (x, y, z)
+            pose.pose.position.x = x
+            pose.pose.position.y = y
+            pose.pose.position.z = 0.0
+
+            # Calculate the yaw angle based on the derivative of the sine function
+            if i < num_points:
+                # Calculate the next point
+                next_x = x_start + (i + 1) * x_step
+                next_y = amplitude * math.sin((2 * math.pi / wavelength) * next_x)
+                dx = next_x - x
+                dy = next_y - y
+            else:
+                # For the last point, use the previous point
+                prev_x = x_start + (i - 1) * x_step
+                prev_y = amplitude * math.sin((2 * math.pi / wavelength) * prev_x)
+                dx = x - prev_x
+                dy = y - prev_y
+
+            yaw = math.atan2(dy, dx)
+
+            # Convert yaw to quaternion
+            quaternion = self.yaw_to_quaternion(yaw)
+            pose.pose.orientation = quaternion
+
+            path.poses.append(pose)
+
+        return path
+
+    def yaw_to_quaternion(self, yaw):
+        # Convert a yaw angle (in radians) into a quaternion message
+        q = Quaternion()
+        q.w = math.cos(yaw / 2.0)
+        q.x = 0.0
+        q.y = 0.0
+        q.z = math.sin(yaw / 2.0)
+        return q
+
+    def publish_path(self, event):
+        self.path.header.stamp = rospy.Time.now()  # Update timestamp
+        for pose in self.path.poses:
+            pose.header.stamp = self.path.header.stamp  # Synchronize timestamps
+        self.path_pub.publish(self.path)  # Publish the path
+        rospy.loginfo("Sinusoidal path published.")
+
+if __name__ == '__main__':
+    try:
+        path_publisher = PathPublisher()
+        rospy.spin()  # Keep the node running
+    except rospy.ROSInterruptException:
+        pass

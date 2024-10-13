@@ -136,6 +136,7 @@ catkin_install_python(PROGRAMS
   scripts/show_circle_creation
   scripts/show_circle_wave
   scripts/gps_path
+  scripts/gps_path_sin
   scripts/simple_msg
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
