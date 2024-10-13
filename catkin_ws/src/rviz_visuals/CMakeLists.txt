@@ -115,17 +115,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ executable
-add_executable(controller_node src/controller.cpp)
-
-## Add cmake target dependencies of the executable
-add_dependencies(controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link the executable target against
-target_link_libraries(controller_node
-  ${catkin_LIBRARIES}
-)
-
 #############
 ## Install ##
 #############
@@ -135,13 +124,7 @@ target_link_libraries(controller_node
 catkin_install_python(PROGRAMS
   scripts/show_circle_creation
   scripts/show_circle_wave
-  scripts/simple_msg
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-## Mark executables for installation
-install(TARGETS controller_node
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 #############
