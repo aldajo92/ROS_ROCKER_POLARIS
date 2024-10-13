@@ -14,7 +14,10 @@ public:
           max_linear_speed_(max_linear_speed),
           wheelbase_(wheelbase),
           path_received_(false),
-          odom_received_(false)
+          odom_received_(false),
+          starting_point_set_(false),
+          waypoints_completed_(0),
+          waypoints_threshold_(100)
     {
         path_sub_ = nh_.subscribe("/gps_path", 10, &PathTrackingController::pathCallback, this);
         odom_sub_ = nh_.subscribe("/gem/base_footprint/odom", 10, &PathTrackingController::odomCallback, this);
@@ -34,6 +37,12 @@ public:
             path_ = *msg;
             path_received_ = true;
             ROS_INFO("Path received with %ld waypoints.", path_.poses.size());
+
+            if (!starting_point_set_ && !path_.poses.empty())
+            {
+                starting_point_ = path_.poses.front().pose.position;
+                starting_point_set_ = true;
+            }
         }
     }
 
@@ -66,6 +75,11 @@ private:
     double wheelbase_;
     bool path_received_;
     bool odom_received_;
+
+    geometry_msgs::Point starting_point_;
+    bool starting_point_set_;
+    size_t waypoints_completed_;
+    const size_t waypoints_threshold_;
 
     ros::Duration log_interval_;
     ros::Time last_log_time_;
@@ -101,6 +115,7 @@ private:
 
         geometry_msgs::Point lookahead_point;
         bool lookahead_point_found = false;
+        double angle_diff;
 
         for (size_t i = closest_point_index; i < path_.poses.size(); ++i)
         {
@@ -112,7 +127,7 @@ private:
             {
                 // Compute the angle between the robot's heading and the vector to the point
                 double angle_to_point = atan2(dy, dx);
-                double angle_diff = angle_to_point - robot_yaw;
+                angle_diff = angle_to_point - robot_yaw;
                 angle_diff = atan2(sin(angle_diff), cos(angle_diff)); // Normalize angle
 
                 if (fabs(angle_diff) <= M_PI / 2)
@@ -120,6 +135,7 @@ private:
                     // The point is ahead of the robot
                     lookahead_point = path_.poses[i].pose.position;
                     lookahead_point_found = true;
+                    waypoints_completed_++;
                     break;
                 }
             }
@@ -129,6 +145,18 @@ private:
         {
             stopRobot();
             ROS_INFO("Goal reached or no valid lookahead point ahead. Stopping the robot.");
+            return;
+        }
+
+        // Check if the robot has completed a loop
+        double dx_to_start = starting_point_.x - robot_x;
+        double dy_to_start = starting_point_.y - robot_y;
+        double distance_to_start = hypot(dx_to_start, dy_to_start);
+
+        if (waypoints_completed_ > waypoints_threshold_ && distance_to_start < lookahead_distance_)
+        {
+            stopRobot();
+            ROS_INFO("Completed a loop. Stopping the robot.");
             return;
         }
 
@@ -183,6 +211,7 @@ private:
             ROS_INFO("Curvature (kappa): %.2f", kappa);
             ROS_INFO("Linear Speed: %.2f", linear_speed);
             ROS_INFO("Angular Speed: %.2f", angular_speed);
+            ROS_INFO("Angle diff: %.2f", angle_diff);
             ROS_INFO("----------------------------------");
         }
     }
@@ -201,8 +230,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "path_tracking_controller");
 
     // Parameters
-    double lookahead_distance = 2.0; // Adjust as needed
-    double max_linear_speed = 2.0;   // Adjust as needed
+    double lookahead_distance = 1.0; // Adjust as needed
+    double max_linear_speed = 2.5;   // Adjust as needed
     double wheelbase = 1.75;         // Adjust based on your robot's wheelbase
 
     PathTrackingController controller(lookahead_distance, max_linear_speed, wheelbase);
