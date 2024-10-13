@@ -230,10 +230,10 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "path_tracking_controller");
 
     // Parameters
-    double lookahead_distance = 1.0;
-    double max_linear_speed = 2.5;
+    double lookahead_distance = 2.0;
+    double max_linear_speed = 2.0;
     double wheelbase = 1.75;
-    
+
     PathTrackingController controller(lookahead_distance, max_linear_speed, wheelbase);
     ros::spin();
     return 0;
