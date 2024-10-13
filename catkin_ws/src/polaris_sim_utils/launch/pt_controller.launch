@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="polaris_sim_utils" type="gps_path_sin" name="gps_path_sin_node" />
-  <!-- <node pkg="polaris_sim_utils" type="waypoints_publisher" name="waypoints_publisher_node" /> -->
+  <!-- <node pkg="polaris_sim_utils" type="gps_path_sin" name="gps_path_sin_node" /> -->
+  <node pkg="polaris_sim_utils" type="waypoints_publisher" name="waypoints_publisher_node" />
   <node pkg="pt_controller" type="path_tracking_controller_node" name="path_tracking_controller" output="screen" />
 </launch>
