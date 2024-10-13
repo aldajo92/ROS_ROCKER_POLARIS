@@ -41,9 +41,9 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "path_tracking_node");
 
     // Parameters
-    double lookahead_distance = 2.0; // Adjust as needed
-    double max_linear_speed = 2.0;   // Adjust as needed
-    double wheelbase = 1.75;         // Adjust based on your robot's wheelbase
+    double lookahead_distance = 2.0;
+    double max_linear_speed = 2.0;
+    double wheelbase = 1.75;
 
     PathTrackingNode node(lookahead_distance, max_linear_speed, wheelbase);
     ros::spin();
