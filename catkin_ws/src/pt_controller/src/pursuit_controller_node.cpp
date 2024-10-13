@@ -19,8 +19,11 @@ public:
         path_sub_ = nh_.subscribe("/gps_path", 10, &PathTrackingController::pathCallback, this);
         odom_sub_ = nh_.subscribe("/gem/base_footprint/odom", 10, &PathTrackingController::odomCallback, this);
         cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/gem/cmd_vel", 10);
+        traveled_path_pub_ = nh_.advertise<nav_msgs::Path>("/traveled_path", 10); // New publisher for traveled path
 
-        log_interval_ = ros::Duration(0.5); 
+        traveled_path_.header.frame_id = "base_footprint"; // Set the frame for traveled path to match odometry
+
+        log_interval_ = ros::Duration(0.5);
         last_log_time_ = ros::Time::now();
     }
 
@@ -45,7 +48,6 @@ public:
         current_odometry_ = *msg;
         odom_received_ = true;
 
-    
         computeControlCommand();
     }
 
@@ -54,8 +56,10 @@ private:
     ros::Subscriber path_sub_;
     ros::Subscriber odom_sub_;
     ros::Publisher cmd_vel_pub_;
+    ros::Publisher traveled_path_pub_; // Publisher for the traveled path
 
     nav_msgs::Path path_;
+    nav_msgs::Path traveled_path_; // Stores the traveled path
     nav_msgs::Odometry current_odometry_;
     double lookahead_distance_;
     double max_linear_speed_;
@@ -63,7 +67,6 @@ private:
     bool path_received_;
     bool odom_received_;
 
-    
     ros::Duration log_interval_;
     ros::Time last_log_time_;
 
@@ -72,7 +75,7 @@ private:
     {
         if (!path_received_ || !odom_received_)
         {
-            return; 
+            return;
         }
 
         // Current position and orientation
@@ -124,7 +127,6 @@ private:
 
         if (!lookahead_point_found)
         {
-            
             stopRobot();
             ROS_INFO("Goal reached or no valid lookahead point ahead. Stopping the robot.");
             return;
@@ -157,6 +159,17 @@ private:
         cmd_vel.linear.x = linear_speed;
         cmd_vel.angular.z = angular_speed;
         cmd_vel_pub_.publish(cmd_vel);
+
+        // Update traveled path
+        geometry_msgs::PoseStamped traveled_pose;
+        traveled_pose.header.stamp = ros::Time::now();
+        traveled_pose.header.frame_id = "odom";           // Same frame as odometry
+        traveled_pose.pose = current_odometry_.pose.pose; // Use the current robot pose
+        traveled_path_.poses.push_back(traveled_pose);
+
+        // Publish the traveled path
+        traveled_path_.header.stamp = ros::Time::now(); // Update the timestamp
+        traveled_path_pub_.publish(traveled_path_);
 
         if (ros::Time::now() - last_log_time_ >= log_interval_)
         {
