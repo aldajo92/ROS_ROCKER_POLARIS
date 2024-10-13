@@ -20,7 +20,6 @@ public:
         odom_sub_ = nh_.subscribe("/gem/base_footprint/odom", 10, &PathTrackingController::odomCallback, this);
         cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/gem/cmd_vel", 10);
 
-        
         log_interval_ = ros::Duration(0.5); 
         last_log_time_ = ros::Time::now();
     }
