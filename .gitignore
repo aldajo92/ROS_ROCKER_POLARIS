@@ -56,5 +56,8 @@ qtcreator-*
 CATKIN_IGNORE
 
 .DS_Store
+*/.DS_Store
+ignore
+
 
 # End of https://www.toptal.com/developers/gitignore/api/ros
