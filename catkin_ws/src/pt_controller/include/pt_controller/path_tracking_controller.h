@@ -36,6 +36,8 @@ private:
     size_t waypoints_completed_;
     const size_t waypoints_threshold_;
     nav_msgs::Path traveled_path_; // Stores the traveled path
+
+    bool isCloseToGoal() const;
 };
 
 #endif // PATH_TRACKING_CONTROLLER_H

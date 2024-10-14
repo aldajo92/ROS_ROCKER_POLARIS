@@ -39,7 +39,21 @@ bool PathTrackingController::isPathReceived() const
 
 bool PathTrackingController::isPathCompleted() const
 {
-    return waypoints_completed_ >= path_.poses.size();
+    return isCloseToGoal();
+}
+
+bool PathTrackingController::isCloseToGoal() const
+{
+    if (path_.poses.empty())
+    {
+        return false;
+    }
+
+    const auto &goal = path_.poses.back().pose.position;
+    const auto &current_position = current_odometry_.pose.pose.position;
+
+    double distance_to_goal = hypot(goal.x - current_position.x, goal.y - current_position.y);
+    return distance_to_goal < lookahead_distance_;
 }
 
 bool PathTrackingController::computeControlCommand()
