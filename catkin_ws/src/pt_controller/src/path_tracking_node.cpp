@@ -59,6 +59,7 @@
 #include <limits>
 
 #include <vector>
+#include <utility>
 
 class PathTrackingController
 {
@@ -138,6 +139,38 @@ private:
     ros::Duration log_interval_;
     ros::Time last_log_time_;
 
+    std::pair<double, int> calculateMinDistanceInPath(
+        const std::vector<double> &position,
+        const nav_msgs::Path &path)
+    {
+        if (position.size() != 2)
+        {
+            ROS_INFO("Position vector must have exactly 2 elements (x and y).");
+            return {std::numeric_limits<double>::max(), -1}; // Return invalid result
+        }
+
+        double robot_x = position[0];
+        double robot_y = position[1];
+
+        double min_distance = std::numeric_limits<double>::max();
+        int closest_point_index = -1;
+
+        for (size_t i = 0; i < path.poses.size(); ++i)
+        {
+            double dx = path.poses[i].pose.position.x - robot_x;
+            double dy = path.poses[i].pose.position.y - robot_y;
+            double distance = hypot(dx, dy);
+
+            if (distance < min_distance)
+            {
+                min_distance = distance;
+                closest_point_index = i;
+            }
+        }
+
+        return {min_distance, closest_point_index};
+    }
+
     std::vector<double> computeControlAction(
         const std::vector<double> &position,
         const std::vector<double> &lookahead_point)
@@ -192,21 +225,10 @@ private:
         double robot_y = current_odometry_.pose.pose.position.y;
         double robot_yaw = tf::getYaw(current_odometry_.pose.pose.orientation);
 
-        double min_distance = std::numeric_limits<double>::max();
-        int closest_point_index = -1;
+        std::pair<double, int> min_distance_index = calculateMinDistanceInPath({robot_x, robot_y}, path_);
 
-        for (size_t i = 0; i < path_.poses.size(); ++i)
-        {
-            double dx = path_.poses[i].pose.position.x - robot_x;
-            double dy = path_.poses[i].pose.position.y - robot_y;
-            double distance = hypot(dx, dy);
-
-            if (distance < min_distance)
-            {
-                min_distance = distance;
-                closest_point_index = i;
-            }
-        }
+        double min_distance = min_distance_index.first;
+        int closest_point_index = min_distance_index.second;
 
         geometry_msgs::Point lookahead_point;
         bool lookahead_point_found = false;
@@ -238,8 +260,8 @@ private:
 
         if (!lookahead_point_found)
         {
-            stopRobot();
             ROS_INFO("Goal reached or no valid lookahead point ahead. Stopping the robot.");
+            stopRobot();
             return;
         }
 
