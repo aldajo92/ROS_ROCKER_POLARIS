@@ -121,11 +121,11 @@ include_directories(
 
 ## Declare a C++ library
 add_library(path_tracking_controller
-  src/path_tracking_controller.cpp
+  src/PathTrackingController.cpp
 )
 
 add_library(planner_path_tracking
-  src/planner_path_tracking.cpp
+  src/PlannerPathTracking.cpp
 )
 
 ## Add cmake target dependencies of the library
