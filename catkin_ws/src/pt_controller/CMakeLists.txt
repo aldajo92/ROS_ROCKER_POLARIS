@@ -120,9 +120,13 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/pt_controller.cpp
-# )
+add_library(path_tracking_controller
+  src/path_tracking_controller.cpp
+)
+
+add_library(planner_path_tracking
+  src/planner_path_tracking.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -132,7 +136,6 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(path_tracking_controller_node src/path_tracking_controller_node.cpp)
 add_executable(path_tracking_node src/path_tracking_node.cpp)
 
 ## Rename C++ executable without prefix
@@ -143,12 +146,9 @@ add_executable(path_tracking_node src/path_tracking_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(path_tracking_controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(path_tracking_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-
-target_link_libraries(path_tracking_controller_node ${catkin_LIBRARIES})
 target_link_libraries(path_tracking_node ${catkin_LIBRARIES})
 
 #############
@@ -198,10 +198,11 @@ target_link_libraries(path_tracking_node ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_pt_controller.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
+target_link_libraries(path_tracking_node
+  planner_path_tracking
+  path_tracking_controller
+  ${catkin_LIBRARIES}
+)
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
