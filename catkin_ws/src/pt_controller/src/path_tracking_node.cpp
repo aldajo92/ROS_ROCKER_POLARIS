@@ -58,6 +58,8 @@
 #include <cmath>
 #include <limits>
 
+#include <vector>
+
 class PathTrackingController
 {
 public:
@@ -136,6 +138,47 @@ private:
     ros::Duration log_interval_;
     ros::Time last_log_time_;
 
+    std::vector<double> computeControlAction(
+        const std::vector<double> &position,
+        const std::vector<double> &lookahead_point)
+    {
+        if (position.size() != 3)
+        {
+
+            ROS_INFO("Position vector must have exactly 3 elements (x, y, yaw).");
+            return {0.0, 0.0};
+        }
+
+        double robot_x = position[0];
+        double robot_y = position[1];
+        double robot_yaw = position[2];
+
+        double lookahead_point_x = lookahead_point[0];
+        double lookahead_point_y = lookahead_point[1];
+
+        double dx = lookahead_point_x - robot_x;
+        double dy = lookahead_point_y - robot_y;
+        double angle_to_goal = atan2(dy, dx);
+        double alpha = angle_to_goal - robot_yaw;
+        alpha = atan2(sin(alpha), cos(alpha)); // Normalize alpha
+
+        // Check if the lookahead point is behind the robot
+        if (fabs(alpha) > M_PI / 2)
+        {
+            ROS_INFO("Lookahead point is behind the robot. Stopping.");
+            return {0.0, 0.0};
+        }
+
+        // Compute the curvature (kappa)
+        double kappa = (2 * sin(alpha)) / lookahead_distance_;
+
+        // Compute linear and angular velocities
+        double linear_speed = max_linear_speed_;
+        double angular_speed = linear_speed * kappa;
+
+        return {linear_speed, angular_speed};
+    }
+
     // Compute the control command using Pure Pursuit with nearest point search
     void computeControlCommand()
     {
@@ -200,39 +243,12 @@ private:
             return;
         }
 
-        // Check if the robot has completed a loop
-        double dx_to_start = starting_point_.x - robot_x;
-        double dy_to_start = starting_point_.y - robot_y;
-        double distance_to_start = hypot(dx_to_start, dy_to_start);
+        std::vector<double> control = computeControlAction(
+            {robot_x, robot_y, robot_yaw},
+            {lookahead_point.x, lookahead_point.y});
 
-        if (waypoints_completed_ > waypoints_threshold_ && distance_to_start < lookahead_distance_)
-        {
-            stopRobot();
-            ROS_INFO("Completed a loop. Stopping the robot.");
-            return;
-        }
-
-        // Compute the steering angle
-        double dx = lookahead_point.x - robot_x;
-        double dy = lookahead_point.y - robot_y;
-        double angle_to_goal = atan2(dy, dx);
-        double alpha = angle_to_goal - robot_yaw;
-        alpha = atan2(sin(alpha), cos(alpha)); // Normalize alpha
-
-        // Check if the lookahead point is behind the robot
-        if (fabs(alpha) > M_PI / 2)
-        {
-            stopRobot();
-            ROS_INFO("Lookahead point is behind the robot. Stopping.");
-            return;
-        }
-
-        // Compute the curvature (kappa)
-        double kappa = (2 * sin(alpha)) / lookahead_distance_;
-
-        // Compute linear and angular velocities
-        double linear_speed = max_linear_speed_;
-        double angular_speed = linear_speed * kappa;
+        double linear_speed = control[0];
+        double angular_speed = control[1];
 
         // Publish velocity command
         geometry_msgs::Twist cmd_vel;
@@ -259,8 +275,8 @@ private:
             ROS_INFO("Robot Position: (x=%.2f, y=%.2f), Yaw: %.2f", robot_x, robot_y, robot_yaw);
             ROS_INFO("Closest Path Point Index: %d", closest_point_index);
             ROS_INFO("Lookahead Point: (x=%.2f, y=%.2f)", lookahead_point.x, lookahead_point.y);
-            ROS_INFO("Alpha (Heading Error): %.2f", alpha);
-            ROS_INFO("Curvature (kappa): %.2f", kappa);
+            // ROS_INFO("Alpha (Heading Error): %.2f", alpha);
+            // ROS_INFO("Curvature (kappa): %.2f", kappa);
             ROS_INFO("Linear Speed: %.2f", linear_speed);
             ROS_INFO("Angular Speed: %.2f", angular_speed);
             ROS_INFO("Angle diff: %.2f", angle_diff);
