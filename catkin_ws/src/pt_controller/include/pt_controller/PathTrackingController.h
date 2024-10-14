@@ -8,29 +8,30 @@
 #include <geometry_msgs/Point.h>
 #include <tf/tf.h>
 #include <vector>
-#include <utility> // For std::pair
+#include <utility>
+#include <functional>
+
+using ControllerActionCallback = std::function<void(double, double)>;
 
 class PathTrackingController
 {
 public:
-    PathTrackingController(double lookahead_distance, double max_linear_speed, double wheelbase);
+    PathTrackingController(double lookahead_distance, double max_linear_speed, double wheelbase, ControllerActionCallback controller_action_callback);
 
-    void pathCallback(const nav_msgs::Path::ConstPtr &msg);
-    void odomCallback(const nav_msgs::Odometry::ConstPtr &msg);
+    void setPath(const nav_msgs::Path &path);
+    void setOdom(const nav_msgs::Odometry &odom);
+
+    void computeControlCommand();
+    void stopRobot();
 
 private:
-    ros::NodeHandle nh_;
-    ros::Subscriber path_sub_;
-    ros::Subscriber odom_sub_;
-    ros::Publisher cmd_vel_pub_;
-    ros::Publisher traveled_path_pub_; // Publisher for the traveled path
-
     nav_msgs::Path path_;
-    nav_msgs::Path traveled_path_; // Stores the traveled path
     nav_msgs::Odometry current_odometry_;
     double lookahead_distance_;
     double max_linear_speed_;
     double wheelbase_;
+    ControllerActionCallback controller_action_callback_;
+
     bool path_received_;
     bool odom_received_;
 
@@ -49,9 +50,6 @@ private:
     std::vector<double> computeControlAction(
         const std::vector<double> &position,
         const std::vector<double> &lookahead_point);
-
-    void computeControlCommand();
-    void stopRobot();
 };
 
 #endif // PATH_TRACKING_CONTROLLER_H

@@ -1,10 +1,10 @@
-#include "pt_controller/planner_path_tracking.h"
+#include "pt_controller/PlannerPathTracking.h"
 
 PlannerPathTracking::PlannerPathTracking(double lookahead_distance, double max_linear_speed, double wheelbase)
     : lookahead_distance_(lookahead_distance),
       max_linear_speed_(max_linear_speed),
       wheelbase_(wheelbase),
-      path_tracking_controller_(lookahead_distance, max_linear_speed, wheelbase),
+    //   path_tracking_controller_(lookahead_distance, max_linear_speed, wheelbase),
       current_state_(INIT)
 {
 }

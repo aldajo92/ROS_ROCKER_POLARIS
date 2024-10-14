@@ -1,31 +1,26 @@
-#include "pt_controller/path_tracking_controller.h"
+#include "pt_controller/pathTrackingController.h"
 
-PathTrackingController::PathTrackingController(double lookahead_distance, double max_linear_speed, double wheelbase)
+PathTrackingController::PathTrackingController(double lookahead_distance, double max_linear_speed, double wheelbase, ControllerActionCallback controller_action_callback)
     : lookahead_distance_(lookahead_distance),
       max_linear_speed_(max_linear_speed),
       wheelbase_(wheelbase),
+      controller_action_callback_(controller_action_callback),
       path_received_(false),
       odom_received_(false),
       starting_point_set_(false),
       waypoints_completed_(0),
       waypoints_threshold_(100)
 {
-    path_sub_ = nh_.subscribe("/gps_path", 10, &PathTrackingController::pathCallback, this);
-    odom_sub_ = nh_.subscribe("/gem/base_footprint/odom", 10, &PathTrackingController::odomCallback, this);
-    cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/gem/cmd_vel", 10);
-    traveled_path_pub_ = nh_.advertise<nav_msgs::Path>("/traveled_path", 10); // New publisher for traveled path
-
-    traveled_path_.header.frame_id = "base_footprint"; // Set the frame for traveled path to match odometry
 
     log_interval_ = ros::Duration(0.5);
     last_log_time_ = ros::Time::now();
 }
 
-void PathTrackingController::pathCallback(const nav_msgs::Path::ConstPtr &msg)
+void PathTrackingController::setPath(const nav_msgs::Path &path)
 {
     if (!path_received_)
     {
-        path_ = *msg;
+        path_ = path;
         path_received_ = true;
         ROS_INFO("Path received with %ld waypoints.", path_.poses.size());
 
@@ -37,7 +32,7 @@ void PathTrackingController::pathCallback(const nav_msgs::Path::ConstPtr &msg)
     }
 }
 
-void PathTrackingController::odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
+void PathTrackingController::setOdom(const nav_msgs::Odometry &odom)
 {
     if (!path_received_)
     {
@@ -45,10 +40,8 @@ void PathTrackingController::odomCallback(const nav_msgs::Odometry::ConstPtr &ms
         return;
     }
 
-    current_odometry_ = *msg;
+    current_odometry_ = odom;
     odom_received_ = true;
-
-    computeControlCommand();
 }
 
 std::pair<double, int> PathTrackingController::calculateMinDistanceInPath(
@@ -183,21 +176,10 @@ void PathTrackingController::computeControlCommand()
     double angular_speed = control[1];
 
     // Publish velocity command
-    geometry_msgs::Twist cmd_vel;
-    cmd_vel.linear.x = linear_speed;
-    cmd_vel.angular.z = angular_speed;
-    cmd_vel_pub_.publish(cmd_vel);
-
-    // Update traveled path
-    geometry_msgs::PoseStamped traveled_pose;
-    traveled_pose.header.stamp = ros::Time::now();
-    traveled_pose.header.frame_id = "odom";           // Same frame as odometry
-    traveled_pose.pose = current_odometry_.pose.pose; // Use the current robot pose
-    traveled_path_.poses.push_back(traveled_pose);
-
-    // Publish the traveled path
-    traveled_path_.header.stamp = ros::Time::now(); // Update the timestamp
-    traveled_path_pub_.publish(traveled_path_);
+    if (controller_action_callback_)
+    {
+        controller_action_callback_(linear_speed, angular_speed);
+    }
 
     if (ros::Time::now() - last_log_time_ >= log_interval_)
     {
@@ -216,8 +198,8 @@ void PathTrackingController::computeControlCommand()
 
 void PathTrackingController::stopRobot()
 {
-    geometry_msgs::Twist stop_msg;
-    stop_msg.linear.x = 0.0;
-    stop_msg.angular.z = 0.0;
-    cmd_vel_pub_.publish(stop_msg);
+    if (controller_action_callback_)
+    {
+        controller_action_callback_(0.0, 0.0);
+    }
 }

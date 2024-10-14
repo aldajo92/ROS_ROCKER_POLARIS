@@ -8,7 +8,7 @@
 #include <tf/tf.h>
 #include <vector>
 #include <limits>
-#include "path_tracking_controller.h"
+#include "PathTrackingController.h"
 
 enum PlannerState
 {
@@ -31,7 +31,7 @@ private:
     double max_linear_speed_;
     double wheelbase_;
     PlannerState current_state_;
-    PathTrackingController path_tracking_controller_;
+    // PathTrackingController path_tracking_controller_;
 
     void updateState();
 };
