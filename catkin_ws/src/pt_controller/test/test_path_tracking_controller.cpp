@@ -9,7 +9,7 @@ protected:
 
   void SetUp() override
   {
-    controller = new PathTrackingController(1.8, 2.0, 1.75, [](double, double) {});
+    controller = new PathTrackingController(1.8, 2.0, 2.0, 0.1, [](double, double) {});
   }
 
   void TearDown() override
@@ -51,8 +51,8 @@ TEST_F(PathTrackingControllerTest, ComputeControlAction)
 
   auto control = controller->computeControlAction(position, lookahead_point);
 
-  EXPECT_NEAR(control[0], 2.0, 1e-2);                               // Linear speed
-  EXPECT_NEAR(control[1], 1.57, 1e-2);                              // Angular speed
+  EXPECT_NEAR(control[0], 1.847759, 1e-2);                          // Linear speed
+  EXPECT_NEAR(control[1], 1.571348, 1e-2);                          // Angular speed
 }
 
 int main(int argc, char **argv)

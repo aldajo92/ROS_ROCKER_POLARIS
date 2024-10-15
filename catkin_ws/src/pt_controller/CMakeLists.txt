@@ -17,7 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
-
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -150,7 +149,11 @@ add_executable(path_tracking_node src/PathTrackingNode.cpp)
 add_dependencies(path_tracking_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(path_tracking_node ${catkin_LIBRARIES})
+target_link_libraries(path_tracking_node
+  planner_path_tracking
+  path_tracking_controller
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -198,28 +201,27 @@ target_link_libraries(path_tracking_node ${catkin_LIBRARIES})
 ## Testing ##
 #############
 
-## Add gtest based cpp test target and link libraries
-target_link_libraries(path_tracking_node
-  planner_path_tracking
-  path_tracking_controller
-  ${catkin_LIBRARIES}
-)
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
-
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(GTest REQUIRED)
   include_directories(include ${catkin_INCLUDE_DIRS})
 
-  catkin_add_gtest(${PROJECT_NAME}_test
+  catkin_add_gtest(path_tracking_controller_test
     test/test_path_tracking_controller.cpp
-    src/PathTrackingController.cpp
+  )
+  target_link_libraries(path_tracking_controller_test
+    path_tracking_controller
+    ${catkin_LIBRARIES}
+    ${GTEST_LIBRARIES}
   )
 
-  # catkin_add_gtest(
-  #   test_path_tracking_controller test/test_path_tracking_controller.cpp)
-  # target_link_libraries(test_path_tracking_controller ${PROJECT_NAME} ${catkin_LIBRARIES} ${GTEST_LIBRARIES} pthread)
-  target_link_libraries(${PROJECT_NAME}_test ${catkin_LIBRARIES})
+  catkin_add_gtest(path_tracking_planner_test
+    test/test_path_tracking_planner.cpp
+  )
+  target_link_libraries(path_tracking_planner_test
+    planner_path_tracking
+    path_tracking_controller
+    ${catkin_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  )
 endif()
