@@ -8,7 +8,7 @@ PathTrackingPlanner::PathTrackingPlanner(double frequency)
 {
 }
 
-PathTrackingPlanner::PathTrackingPlanner(double frequency, PathTrackingController *controller)
+PathTrackingPlanner::PathTrackingPlanner(double frequency, AbstractPathTrackingController *controller)
     : current_state_(INIT), running_(false), frequency_(frequency), controller_(controller)
 {
 }

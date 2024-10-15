@@ -1,9 +1,9 @@
 <launch>
   <node pkg="polaris_sim_utils" type="gps_path_sin" name="gps_path_sin_node" />
-  <node pkg="pt_controller" type="path_tracking_node" name="path_tracking_controller" output="screen">
+  <node pkg="pt_controller" type="path_tracking_node" name="path_tracking_controller">
         <param name="lookahead_distance" type="double" value="2.0" />
         <param name="max_linear_speed" type="double" value="2.0" />
-        <param name="max_angular_speed" type="double" value="1.0" />
+        <param name="max_angular_speed" type="double" value="2.0" />
         <param name="goal_tolerance" type="double" value="0.2" />
         <param name="frequency" type="double" value="10.0" />
   </node>

@@ -14,8 +14,6 @@ PathTrackingController::PathTrackingController(
       path_received_(false),
       odom_received_(false),
       starting_point_set_(false),
-      waypoints_completed_(0),
-      waypoints_threshold_(100),
       log_interval_(std::chrono::duration<double>(0.5)),
       last_log_time_(std::chrono::system_clock::now())
 {
@@ -149,7 +147,6 @@ void PathTrackingController::computeControlCommand()
                 // The point is ahead of the robot
                 lookahead_point = path_.poses[i].pose.position;
                 lookahead_point_found = true;
-                waypoints_completed_++;
                 break;
             }
         }

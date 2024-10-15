@@ -2,7 +2,6 @@
 #define PATH_TRACKING_PLANNER_H
 
 #include <atomic>
-#include <chrono>
 #include <thread>
 #include <string>
 #include "pt_controller/PathTrackingController.h"
@@ -21,24 +20,23 @@ class PathTrackingPlanner
 {
 public:
     PathTrackingPlanner(double frequency);
-    PathTrackingPlanner(double frequency, PathTrackingController *controller);
+    PathTrackingPlanner(double frequency, AbstractPathTrackingController *controller);
     ~PathTrackingPlanner();
-
-    std::string stateToString(PathTrackingState state) const;
 
     void execute();
     void stop();
     PathTrackingState getState() const;
+    std::string stateToString(PathTrackingState state) const;
 
 private:
-    PathTrackingState current_state_;
-    std::thread planner_thread_;
-    PathTrackingController *controller_;
-    std::atomic<bool> running_;
-    double frequency_;
-
     void stateMonitor();
     void updateState(PathTrackingState state);
+
+    std::atomic<bool> running_;
+    std::thread planner_thread_;
+    PathTrackingState current_state_;
+    double frequency_;
+    AbstractPathTrackingController *controller_;
 };
 
 #endif // PATH_TRACKING_PLANNER_H
