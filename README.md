@@ -111,13 +111,15 @@ For detailed installation instructions, please follow the steps provided in this
 roslaunch polaris_sim_utils polaris_gazebo.launch
 ```
 
-### Dockerfile Explanation
+### Dockerfile
 
 The Docker setup allows easy deployment and testing of the project in different environments (Ubuntu and Mac OS). For Nvidia users, the Dockerfile is optimized to leverage GPU-based simulations with the Nvidia container toolkit using ROCKER (https://github.com/osrf/rocker).
 
 ### Videos
 
-- **Path Tracking Controller in Action**: [Path Tracking Controller Video](https://www.youtube.com/watch?v=4YP2Vtt6SmI)
+- **Path Tracking Controller in Action**: [Path Tracking Controller Video 1](https://www.youtube.com/watch?v=4YP2Vtt6SmI)
+
+- **Path Tracking Controller for a Sinus Path**: [Path Tracking Controller Video 2](https://www.youtube.com/watch?v=r4IYHgJRjiA)
 
 ### Author
 Alejandro Daniel José Gómez Flórez (aldajo92)
