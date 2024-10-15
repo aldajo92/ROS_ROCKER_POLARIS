@@ -10,8 +10,8 @@ enum PathTrackingState
 {
     INIT,
     FOLLOW_PATH,
-    MISSING_ODOM,
-    MISSING_PATH,
+    WAITING_ODOM,
+    WAITING_PATH,
     ERROR,
     SUCCESS_END_PATH
 };
