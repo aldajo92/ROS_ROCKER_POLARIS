@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rospy
 import math
 from nav_msgs.msg import Path
@@ -28,7 +30,7 @@ class PathPublisher:
         wavelength = 30.0   # Wavelength of the sine wave
         num_points = 100    # Number of waypoints
         x_start = 0.0       # Starting x position
-        x_end = 60.0        # Ending x position
+        x_end = 45.0        # Ending x position
         x_step = (x_end - x_start) / num_points  # Step size for x
 
         # Create a sinusoidal path
