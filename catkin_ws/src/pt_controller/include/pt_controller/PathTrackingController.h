@@ -7,17 +7,20 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Point.h>
 #include <tf/tf.h>
-#include <vector>
 #include <utility>
+#include <cmath>
 #include <functional>
-#include <chrono>
 
 using ControllerActionCallback = std::function<void(double, double)>;
 
 class PathTrackingController
 {
 public:
-    PathTrackingController(double lookahead_distance, double max_linear_speed, double wheelbase, ControllerActionCallback controller_action_callback);
+    PathTrackingController(
+        double lookahead_distance,
+        double max_linear_speed,
+        double max_angular_speed,
+        ControllerActionCallback controller_action_callback);
 
     void setPath(const nav_msgs::Path &path);
     void setOdom(const nav_msgs::Odometry &odom);
@@ -32,13 +35,19 @@ public:
     std::vector<double> computeControlAction(
         const std::vector<double> &position,
         const std::vector<double> &lookahead_point);
+    
+    bool isReachGoal() const;
+    
+    bool isOdomReceived() const;
+    bool isPathReceived() const;
 
 private:
     nav_msgs::Path path_;
     nav_msgs::Odometry current_odometry_;
     double lookahead_distance_;
     double max_linear_speed_;
-    double wheelbase_;
+    double max_angular_speed_;
+    
     ControllerActionCallback controller_action_callback_;
 
     bool path_received_;

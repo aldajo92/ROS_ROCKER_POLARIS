@@ -3,13 +3,13 @@
 #include <chrono>
 #include <thread>
 
-PathTrackingPlanner::PathTrackingPlanner()
-    : current_state_(INIT), running_(false), controller_(nullptr)
+PathTrackingPlanner::PathTrackingPlanner(double frequency)
+    : current_state_(INIT), running_(false), frequency_(frequency), controller_(nullptr)
 {
 }
 
-PathTrackingPlanner::PathTrackingPlanner(PathTrackingController *controller)
-    : current_state_(INIT), running_(false), controller_(controller)
+PathTrackingPlanner::PathTrackingPlanner(double frequency, PathTrackingController *controller)
+    : current_state_(INIT), running_(false), frequency_(frequency), controller_(controller)
 {
 }
 
@@ -33,12 +33,12 @@ void PathTrackingPlanner::stop()
     }
 }
 
-PlannerState PathTrackingPlanner::getState() const
+PathTrackingState PathTrackingPlanner::getState() const
 {
     return current_state_;
 }
 
-std::string PathTrackingPlanner::stateToString(PlannerState state) const
+std::string PathTrackingPlanner::stateToString(PathTrackingState state) const
 {
     switch (state)
     {
@@ -46,6 +46,10 @@ std::string PathTrackingPlanner::stateToString(PlannerState state) const
         return "INIT";
     case FOLLOW_PATH:
         return "FOLLOW_PATH";
+    case MISSING_ODOM:
+        return "MISSING_ODOM";
+    case MISSING_PATH:
+        return "MISSING_PATH";
     case ERROR:
         return "ERROR";
     case SUCCESS_END_PATH:
@@ -57,22 +61,44 @@ std::string PathTrackingPlanner::stateToString(PlannerState state) const
 
 void PathTrackingPlanner::stateMonitor()
 {
-    while (running_.load())
+    updateState(INIT);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    if (controller_ == nullptr)
     {
-        current_state_ = INIT;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::cout << "Current state: " << stateToString(current_state_) << std::endl;
-
-        current_state_ = FOLLOW_PATH;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::cout << "Current state: " << stateToString(current_state_) << std::endl;
-
         current_state_ = ERROR;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::cout << "Current state: " << stateToString(current_state_) << std::endl;
-
-        current_state_ = SUCCESS_END_PATH;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::cout << "Current state: " << stateToString(current_state_) << std::endl;
+        updateState(ERROR);
     }
+
+    while (running_.load() && controller_ != nullptr)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(1000 / frequency_)));
+
+        if (!controller_->isPathReceived())
+        {
+            updateState(MISSING_PATH);
+            continue;
+        }
+
+        if (!controller_->isOdomReceived())
+        {
+            updateState(MISSING_ODOM);
+            continue;
+        }
+
+        updateState(FOLLOW_PATH);
+
+        controller_->computeControlCommand();
+
+        if (controller_->isReachGoal())
+        {
+            updateState(SUCCESS_END_PATH);
+        }
+    }
+}
+
+void PathTrackingPlanner::updateState(PathTrackingState state)
+{
+    current_state_ = state;
+    std::cout << "Current state: " << stateToString(current_state_) << std::endl;
 }

@@ -1,9 +1,13 @@
 #include "pt_controller/PathTrackingController.h"
 
-PathTrackingController::PathTrackingController(double lookahead_distance, double max_linear_speed, double wheelbase, ControllerActionCallback controller_action_callback)
+PathTrackingController::PathTrackingController(
+    double lookahead_distance,
+    double max_linear_speed,
+    double max_angular_speed,
+    ControllerActionCallback controller_action_callback)
     : lookahead_distance_(lookahead_distance),
       max_linear_speed_(max_linear_speed),
-      wheelbase_(wheelbase),
+      max_angular_speed_(max_angular_speed),
       controller_action_callback_(controller_action_callback),
       path_received_(false),
       odom_received_(false),
@@ -101,21 +105,16 @@ std::vector<double> PathTrackingController::computeControlAction(
     // Compute the curvature (kappa)
     double kappa = (2 * sin(alpha)) / lookahead_distance_;
 
-    // Compute linear and angular velocities
-    double linear_speed = max_linear_speed_;
-    double angular_speed = linear_speed * kappa;
+    double alignment_factor = cos(alpha/2);
+    double linear_speed = max_linear_speed_ * std::max(alignment_factor, 0.0);
+
+    double angular_speed = max_angular_speed_ * kappa;
 
     return {linear_speed, angular_speed, alpha, kappa};
 }
 
 void PathTrackingController::computeControlCommand()
 {
-    if (!path_received_ || !odom_received_)
-    {
-        return;
-    }
-
-    // Current position and orientation
     double robot_x = current_odometry_.pose.pose.position.x;
     double robot_y = current_odometry_.pose.pose.position.y;
     double robot_yaw = tf::getYaw(current_odometry_.pose.pose.orientation);
@@ -128,12 +127,13 @@ void PathTrackingController::computeControlCommand()
     geometry_msgs::Point lookahead_point;
     bool lookahead_point_found = false;
     double angle_diff;
+    double distance;
 
     for (size_t i = closest_point_index; i < path_.poses.size(); ++i)
     {
         double dx = path_.poses[i].pose.position.x - robot_x;
         double dy = path_.poses[i].pose.position.y - robot_y;
-        double distance = hypot(dx, dy);
+        distance = hypot(dx, dy);
 
         if (distance >= lookahead_distance_)
         {
@@ -153,12 +153,12 @@ void PathTrackingController::computeControlCommand()
         }
     }
 
-    if (!lookahead_point_found)
-    {
-        ROS_INFO("Goal reached or no valid lookahead point ahead. Stopping the robot.");
-        stopRobot();
-        return;
-    }
+    // if (!lookahead_point_found)
+    // {
+    //     ROS_INFO("Goal reached or no valid lookahead point ahead. Stopping the robot.");
+    //     stopRobot();
+    //     return;
+    // }
 
     std::vector<double> control = computeControlAction(
         {robot_x, robot_y, robot_yaw},
@@ -172,7 +172,7 @@ void PathTrackingController::computeControlCommand()
     // Check if the lookahead point is behind the robot
     if (fabs(alpha) > M_PI / 2)
     {
-        ROS_INFO("Lookahead point is behind the robot. Stopping.");
+        // ROS_INFO("Lookahead point is behind the robot. Stopping.");
         stopRobot();
     }
 
@@ -192,11 +192,42 @@ void PathTrackingController::computeControlCommand()
         ROS_INFO("Lookahead Point: (x=%.2f, y=%.2f)", lookahead_point.x, lookahead_point.y);
         ROS_INFO("Alpha (Heading Error): %.2f", alpha);
         ROS_INFO("Curvature (kappa): %.2f", kappa);
+        ROS_INFO("Distance: %.2f", distance);
         ROS_INFO("Linear Speed: %.2f", linear_speed);
         ROS_INFO("Angular Speed: %.2f", angular_speed);
         ROS_INFO("Angle diff: %.2f", angle_diff);
         ROS_INFO("----------------------------------");
     }
+}
+
+bool PathTrackingController::isReachGoal() const
+{
+    if (path_.poses.empty())
+    {
+        return false;
+    }
+
+    auto last_point = path_.poses.back().pose.position;
+    double robot_x = current_odometry_.pose.pose.position.x;
+    double robot_y = current_odometry_.pose.pose.position.y;
+
+    double dx = robot_x - last_point.x;
+    double dy = robot_y - last_point.y;
+    double distance = std::sqrt(dx * dx + dy * dy);
+    double margin_of_error = 0.005 * distance;
+    
+    return distance <= margin_of_error;
+    return true;
+}
+
+bool PathTrackingController::isOdomReceived() const
+{
+    return odom_received_;
+}
+
+bool PathTrackingController::isPathReceived() const
+{
+    return path_received_;
 }
 
 void PathTrackingController::stopRobot()

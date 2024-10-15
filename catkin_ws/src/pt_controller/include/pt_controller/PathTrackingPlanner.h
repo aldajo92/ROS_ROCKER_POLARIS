@@ -1,5 +1,5 @@
-#ifndef PLANNER_PATH_TRACKING_H
-#define PLANNER_PATH_TRACKING_H
+#ifndef PATH_TRACKING_PLANNER_H
+#define PATH_TRACKING_PLANNER_H
 
 #include <atomic>
 #include <chrono>
@@ -7,10 +7,12 @@
 #include <string>
 #include "pt_controller/PathTrackingController.h"
 
-enum PlannerState
+enum PathTrackingState
 {
     INIT,
     FOLLOW_PATH,
+    MISSING_ODOM,
+    MISSING_PATH,
     ERROR,
     SUCCESS_END_PATH
 };
@@ -18,23 +20,25 @@ enum PlannerState
 class PathTrackingPlanner
 {
 public:
-    PathTrackingPlanner();
-    PathTrackingPlanner(PathTrackingController *controller);
+    PathTrackingPlanner(double frequency);
+    PathTrackingPlanner(double frequency, PathTrackingController *controller);
     ~PathTrackingPlanner();
 
-    std::string stateToString(PlannerState state) const;
+    std::string stateToString(PathTrackingState state) const;
 
     void execute();
     void stop();
-    PlannerState getState() const;
+    PathTrackingState getState() const;
 
 private:
-    void stateMonitor();
-
-    PlannerState current_state_;
+    PathTrackingState current_state_;
     std::thread planner_thread_;
     PathTrackingController *controller_;
     std::atomic<bool> running_;
+    double frequency_;
+
+    void stateMonitor();
+    void updateState(PathTrackingState state);
 };
 
-#endif // PLANNER_PATH_TRACKING_H
+#endif // PATH_TRACKING_PLANNER_H

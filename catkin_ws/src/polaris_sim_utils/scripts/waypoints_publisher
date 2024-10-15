@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rospy
 import csv
 from nav_msgs.msg import Path
@@ -28,7 +30,7 @@ def waypoints_to_path(waypoints, frame_id):
 
 def main():
     rospy.init_node('waypoints_publisher')
-    waypoints_file = rospy.get_param('~waypoints_file', '/catkin_ws/src/POLARIS_GEM_e2/polaris_gem_drivers_sim/gem_pure_pursuit_sim/waypoints/wps.csv')
+    waypoints_file = rospy.get_param('~waypoints_file', '/catkin_ws/src/polaris_sim_utils/data/wps.csv')
     frame_id = rospy.get_param('~frame_id', 'base_footprint')  # Replace 'base_link' with the actual frame ID
     waypoints = read_waypoints(waypoints_file)
     path = waypoints_to_path(waypoints, frame_id)
