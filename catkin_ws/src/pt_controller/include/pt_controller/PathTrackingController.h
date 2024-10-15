@@ -10,6 +10,7 @@
 #include <vector>
 #include <utility>
 #include <functional>
+#include <chrono>
 
 using ControllerActionCallback = std::function<void(double, double)>;
 
@@ -48,8 +49,8 @@ private:
     size_t waypoints_completed_;
     const size_t waypoints_threshold_;
 
-    // ros::Duration log_interval_;
-    // ros::Time last_log_time_;
+    std::chrono::duration<double> log_interval_;
+    std::chrono::time_point<std::chrono::system_clock> last_log_time_;
 };
 
 #endif // PATH_TRACKING_CONTROLLER_H

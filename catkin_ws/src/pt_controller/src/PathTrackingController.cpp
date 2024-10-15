@@ -9,11 +9,10 @@ PathTrackingController::PathTrackingController(double lookahead_distance, double
       odom_received_(false),
       starting_point_set_(false),
       waypoints_completed_(0),
-      waypoints_threshold_(100)
+      waypoints_threshold_(100),
+      log_interval_(std::chrono::duration<double>(0.5)),
+      last_log_time_(std::chrono::system_clock::now())
 {
-
-    // log_interval_ = ros::Duration(0.5);
-    // last_log_time_ = ros::Time::now();
 }
 
 void PathTrackingController::setPath(const nav_msgs::Path &path)
@@ -97,14 +96,7 @@ std::vector<double> PathTrackingController::computeControlAction(
     double dy = lookahead_point_y - robot_y;
     double angle_to_goal = atan2(dy, dx);
     double alpha = angle_to_goal - robot_yaw;
-    alpha = atan2(sin(alpha), cos(alpha)); // Normalize alpha
-
-    // Check if the lookahead point is behind the robot
-    if (fabs(alpha) > M_PI / 2)
-    {
-        ROS_INFO("Lookahead point is behind the robot. Stopping.");
-        return {0.0, 0.0};
-    }
+    alpha = atan2(sin(alpha), cos(alpha));
 
     // Compute the curvature (kappa)
     double kappa = (2 * sin(alpha)) / lookahead_distance_;
@@ -113,7 +105,7 @@ std::vector<double> PathTrackingController::computeControlAction(
     double linear_speed = max_linear_speed_;
     double angular_speed = linear_speed * kappa;
 
-    return {linear_speed, angular_speed};
+    return {linear_speed, angular_speed, alpha, kappa};
 }
 
 void PathTrackingController::computeControlCommand()
@@ -174,6 +166,15 @@ void PathTrackingController::computeControlCommand()
 
     double linear_speed = control[0];
     double angular_speed = control[1];
+    double alpha = control[2];
+    double kappa = control[3];
+
+    // Check if the lookahead point is behind the robot
+    if (fabs(alpha) > M_PI / 2)
+    {
+        ROS_INFO("Lookahead point is behind the robot. Stopping.");
+        stopRobot();
+    }
 
     // Publish velocity command
     if (controller_action_callback_)
@@ -181,19 +182,21 @@ void PathTrackingController::computeControlCommand()
         controller_action_callback_(linear_speed, angular_speed);
     }
 
-    // if (ros::Time::now() - last_log_time_ >= log_interval_)
-    // {
-    //     last_log_time_ = ros::Time::now();
+    if (std::chrono::system_clock::now() - last_log_time_ >= log_interval_)
+    {
+        last_log_time_ = std::chrono::system_clock::now();
 
-    //     ROS_INFO("---- Pure Pursuit Controller ----");
-    //     ROS_INFO("Robot Position: (x=%.2f, y=%.2f), Yaw: %.2f", robot_x, robot_y, robot_yaw);
-    //     ROS_INFO("Closest Path Point Index: %d", closest_point_index);
-    //     ROS_INFO("Lookahead Point: (x=%.2f, y=%.2f)", lookahead_point.x, lookahead_point.y);
-    //     ROS_INFO("Linear Speed: %.2f", linear_speed);
-    //     ROS_INFO("Angular Speed: %.2f", angular_speed);
-    //     ROS_INFO("Angle diff: %.2f", angle_diff);
-    //     ROS_INFO("----------------------------------");
-    // }
+        ROS_INFO("---- Pure Pursuit Controller ----");
+        ROS_INFO("Robot Position: (x=%.2f, y=%.2f), Yaw: %.2f", robot_x, robot_y, robot_yaw);
+        ROS_INFO("Closest Path Point Index: %d", closest_point_index);
+        ROS_INFO("Lookahead Point: (x=%.2f, y=%.2f)", lookahead_point.x, lookahead_point.y);
+        ROS_INFO("Alpha (Heading Error): %.2f", alpha);
+        ROS_INFO("Curvature (kappa): %.2f", kappa);
+        ROS_INFO("Linear Speed: %.2f", linear_speed);
+        ROS_INFO("Angular Speed: %.2f", angular_speed);
+        ROS_INFO("Angle diff: %.2f", angle_diff);
+        ROS_INFO("----------------------------------");
+    }
 }
 
 void PathTrackingController::stopRobot()

@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+    <test test-name="test_path_tracking_controller" pkg="pt_controller" type="test_path_tracking_controller" />
+</launch>
