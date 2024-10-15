@@ -10,7 +10,7 @@ The `polaris_sim_utils` package contains utilities and tools to launch the Polar
 
 - **Utility Scripts**: Scripts to generate helpful paths.
 - **Launch Files**: Pre-configured launch files to execute simulation or just the controller with paths.
-- **RVIZ Configurations**: Custom RVIZ configuration to validate the path tracking.
+- **RVIZ File**: Custom rviz configuration to validate the path tracking, based on the rviz configuration provided by Polaris GEM e2 vehicle.
 
 ## Path Tracking Controller (pt_controller)
 
@@ -66,7 +66,35 @@ std::vector<double> PathTrackingController::computeControlAction(
 }
 ```
 
-### Design Choices and Architecture
+### PathTrackingPlanner
+
+The `PathTrackingPlanner` class in the `pt_controller` package manages the state of the path tracking process for the Polaris GEM e2 vehicle. It does not directly compute path calculations but instead oversees the execution of path tracking based on the current state of path and odometry data availability, and vehicle's goal-reaching status.
+
+#### Key Components and Functionality
+
+- **State Management**: Manages various operational states such as initialization, error handling, and successful completion of path tracking.
+- **Threaded Execution**: Runs its monitoring logic in a separate thread to regularly check the status and progression of path tracking.
+- **Control Delegation**: Delegates the computation of control commands to the `PathTrackingController`, ensuring that actions are based on the latest available data.
+
+#### Workflow Description
+
+1. **Initialization**: Starts in the INIT state and checks for controller availability.
+2. **State Monitoring**: Continuously monitors and updates the state based on path and odometry data availability:
+   - **MISSING_PATH**: Triggered if path data is missing.
+   - **MISSING_ODOM**: Triggered if odometry data is missing.
+   - **FOLLOW_PATH**: Engaged when both path and odometry data are sufficient for path tracking.
+3. **Error Handling and Goal Achievement**: Manages errors and checks if the goal is reached, stopping the vehicle if necessary.
+
+#### Example Usage
+
+```cpp
+PathTrackingPlanner planner(10.0, &controller, [&](PathTrackingState state){
+    std::cout << "State updated to: " << planner.stateToString(state) << std::endl;
+});
+planner.execute();
+```
+
+### Design Choices
 
 - **Modular Design**: The simulation and control logic are separated into distinct packages (`polaris_sim_utils` for simulation utilities and `pt_controller` for path tracking). This makes the system more flexible and scalable for future developments.
   
