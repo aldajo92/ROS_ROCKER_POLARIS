@@ -24,6 +24,14 @@ public:
     void computeControlCommand();
     void stopRobot();
 
+    std::pair<double, int> calculateMinDistanceInPath(
+        const std::vector<double> &position,
+        const nav_msgs::Path &path);
+
+    std::vector<double> computeControlAction(
+        const std::vector<double> &position,
+        const std::vector<double> &lookahead_point);
+
 private:
     nav_msgs::Path path_;
     nav_msgs::Odometry current_odometry_;
@@ -40,16 +48,8 @@ private:
     size_t waypoints_completed_;
     const size_t waypoints_threshold_;
 
-    ros::Duration log_interval_;
-    ros::Time last_log_time_;
-
-    std::pair<double, int> calculateMinDistanceInPath(
-        const std::vector<double> &position,
-        const nav_msgs::Path &path);
-
-    std::vector<double> computeControlAction(
-        const std::vector<double> &position,
-        const std::vector<double> &lookahead_point);
+    // ros::Duration log_interval_;
+    // ros::Time last_log_time_;
 };
 
 #endif // PATH_TRACKING_CONTROLLER_H

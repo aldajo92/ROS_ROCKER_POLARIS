@@ -1,4 +1,4 @@
-#include "pt_controller/pathTrackingController.h"
+#include "pt_controller/PathTrackingController.h"
 
 PathTrackingController::PathTrackingController(double lookahead_distance, double max_linear_speed, double wheelbase, ControllerActionCallback controller_action_callback)
     : lookahead_distance_(lookahead_distance),
@@ -12,8 +12,8 @@ PathTrackingController::PathTrackingController(double lookahead_distance, double
       waypoints_threshold_(100)
 {
 
-    log_interval_ = ros::Duration(0.5);
-    last_log_time_ = ros::Time::now();
+    // log_interval_ = ros::Duration(0.5);
+    // last_log_time_ = ros::Time::now();
 }
 
 void PathTrackingController::setPath(const nav_msgs::Path &path)
@@ -181,19 +181,19 @@ void PathTrackingController::computeControlCommand()
         controller_action_callback_(linear_speed, angular_speed);
     }
 
-    if (ros::Time::now() - last_log_time_ >= log_interval_)
-    {
-        last_log_time_ = ros::Time::now();
+    // if (ros::Time::now() - last_log_time_ >= log_interval_)
+    // {
+    //     last_log_time_ = ros::Time::now();
 
-        ROS_INFO("---- Pure Pursuit Controller ----");
-        ROS_INFO("Robot Position: (x=%.2f, y=%.2f), Yaw: %.2f", robot_x, robot_y, robot_yaw);
-        ROS_INFO("Closest Path Point Index: %d", closest_point_index);
-        ROS_INFO("Lookahead Point: (x=%.2f, y=%.2f)", lookahead_point.x, lookahead_point.y);
-        ROS_INFO("Linear Speed: %.2f", linear_speed);
-        ROS_INFO("Angular Speed: %.2f", angular_speed);
-        ROS_INFO("Angle diff: %.2f", angle_diff);
-        ROS_INFO("----------------------------------");
-    }
+    //     ROS_INFO("---- Pure Pursuit Controller ----");
+    //     ROS_INFO("Robot Position: (x=%.2f, y=%.2f), Yaw: %.2f", robot_x, robot_y, robot_yaw);
+    //     ROS_INFO("Closest Path Point Index: %d", closest_point_index);
+    //     ROS_INFO("Lookahead Point: (x=%.2f, y=%.2f)", lookahead_point.x, lookahead_point.y);
+    //     ROS_INFO("Linear Speed: %.2f", linear_speed);
+    //     ROS_INFO("Angular Speed: %.2f", angular_speed);
+    //     ROS_INFO("Angle diff: %.2f", angle_diff);
+    //     ROS_INFO("----------------------------------");
+    // }
 }
 
 void PathTrackingController::stopRobot()

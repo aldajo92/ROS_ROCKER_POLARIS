@@ -9,7 +9,9 @@ project(pt_controller)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  std_msgs
+  nav_msgs
+  geometry_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,9 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES pt_controller
-#  CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
+  LIBRARIES pt_controller
+  CATKIN_DEPENDS roscpp nav_msgs geometry_msgs tf
 )
 
 ###########
@@ -206,3 +207,19 @@ target_link_libraries(path_tracking_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  find_package(GTest REQUIRED)
+  include_directories(include ${catkin_INCLUDE_DIRS})
+
+  catkin_add_gtest(${PROJECT_NAME}_test
+    test/test_path_tracking_controller.cpp
+    src/PathTrackingController.cpp
+  )
+
+  # catkin_add_gtest(
+  #   test_path_tracking_controller test/test_path_tracking_controller.cpp)
+  # target_link_libraries(test_path_tracking_controller ${PROJECT_NAME} ${catkin_LIBRARIES} ${GTEST_LIBRARIES} pthread)
+  target_link_libraries(${PROJECT_NAME}_test ${catkin_LIBRARIES})
+endif()
