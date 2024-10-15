@@ -1,4 +1,82 @@
-# ROS and Rocker: Turtlebot3
+# Polaris GEM e2 Simulation and Path Tracking Controller
+
+This repository contains two main packages for ROS Noetic: `polaris_sim_utils` and `pt_controller`. These packages are designed to work together to provide utilities for the Polaris GEM e2 vehicle and to control its path tracking in a ROS environment.
+
+## Table of Contents
+
+- [Polaris Simulation Utilities](#polaris-simulation-utilities)
+- [Path Tracking Controller](#path-tracking-controller)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Design Choices and Architecture](#design-choices-and-architecture)
+- [Dockerfile Explanation](#dockerfile-explanation)
+- [License](#license)
+
+## Polaris Simulation Utilities
+
+The `polaris_sim_utils` package contains utilities and tools to launch the Polaris GEM e2 vehicle and generate some helper paths to validate the controllers provided by `pt_controller` package.
+
+### Features
+
+- **Utility Scripts**: Scripts to generate some helpful paths.
+- **Launch Files**: Pre-configured launch files to execute simulation or just the controller with paths.
+- **RVIZ Files**: Custom rviz configuration to validate the path tracking, based on the rviz configuration provided by Polaris GEM e2 vehicle.
+
+## Path Tracking Controller (pt_controller)
+
+The `pt_controller` package contains the implementation of a path tracking controller for the Polaris GEM e2 vehicle. This controller is responsible for following a predefined path using feedback from the vehicle's odometry.
+
+### Features
+
+- **Path Tracking Planner**: Plans the path for the vehicle to follow.
+- **Path Tracking Controller**: Controls the vehicle to follow the planned path.
+
+### Architecture and Code Design
+
+The `pt_controller` package is designed with a modular architecture to separate the concerns of path planning and path following. The main components are the `PathTrackingPlanner` and the `PathTrackingController`.
+
+#### PathTrackingPlanner
+
+The `PathTrackingPlanner` is responsible for planning the path that the vehicle should follow. It takes into account the vehicle's current position and the desired path.
+
+**PathTrackingPlanner.h**
+
+```cpp
+#ifndef PT_CONTROLLER_PATH_TRACKING_PLANNER_H
+#define PT_CONTROLLER_PATH_TRACKING_PLANNER_H
+
+#include "pt_controller/PathTrackingController.h"
+#include <ros/ros.h>
+
+class PathTrackingPlanner
+{
+public:
+    enum State
+    {
+        INIT,
+        MISSING_PATH,
+        MISSING_ODOM,
+        FOLLOW_PATH,
+        REACHED_GOAL
+    };
+
+    PathTrackingPlanner(double frequency, AbstractPathTrackingController* controller, ros::NodeHandle* nh);
+    void execute();
+    void stop();
+    State getState() const;
+
+private:
+    double frequency_;
+    AbstractPathTrackingController* controller_;
+    ros::NodeHandle* nh_;
+    State state_;
+};
+
+#endif // PT_CONTROLLER_PATH_TRACKING_PLANNER_H
+
+
+
+# ROS and Rocker: Polaris #
 
 This repository contains the Dockerfile for the turtlebot3 simulation, using [Rocker](https://github.com/osrf/rocker) (Docker tool) and the docker base image `noetic-desktop-full`.
 

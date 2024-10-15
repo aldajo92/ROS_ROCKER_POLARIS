@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find polaris_sim_utils)/launch/gem_gazebo_rviz.launch" />
+    <include file="$(find polaris_sim_utils)/launch/pt_controller.launch" />
+</launch>
