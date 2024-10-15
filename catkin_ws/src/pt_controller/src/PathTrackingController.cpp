@@ -4,10 +4,12 @@ PathTrackingController::PathTrackingController(
     double lookahead_distance,
     double max_linear_speed,
     double max_angular_speed,
+    double goal_tolerance,
     ControllerActionCallback controller_action_callback)
     : lookahead_distance_(lookahead_distance),
       max_linear_speed_(max_linear_speed),
       max_angular_speed_(max_angular_speed),
+      goal_tolerance_(goal_tolerance),
       controller_action_callback_(controller_action_callback),
       path_received_(false),
       odom_received_(false),
@@ -153,12 +155,12 @@ void PathTrackingController::computeControlCommand()
         }
     }
 
-    // if (!lookahead_point_found)
-    // {
-    //     ROS_INFO("Goal reached or no valid lookahead point ahead. Stopping the robot.");
-    //     stopRobot();
-    //     return;
-    // }
+    if (!lookahead_point_found)
+    {
+        // ROS_INFO("Goal reached or no valid lookahead point ahead. Stopping the robot.");
+        stopRobot();
+        return;
+    }
 
     std::vector<double> control = computeControlAction(
         {robot_x, robot_y, robot_yaw},
@@ -207,17 +209,21 @@ bool PathTrackingController::isReachGoal() const
         return false;
     }
 
-    auto last_point = path_.poses.back().pose.position;
+    geometry_msgs::Point last_point = path_.poses.back().pose.position;
     double robot_x = current_odometry_.pose.pose.position.x;
     double robot_y = current_odometry_.pose.pose.position.y;
 
     double dx = robot_x - last_point.x;
     double dy = robot_y - last_point.y;
     double distance = std::sqrt(dx * dx + dy * dy);
-    double margin_of_error = 0.005 * distance;
     
-    return distance <= margin_of_error;
-    return true;
+    ROS_INFO("---- Error Measure ----");
+    ROS_INFO("Distance: %.2f", distance);
+    ROS_INFO("----------------------------------");
+    
+    bool reached = distance <= goal_tolerance_;
+
+    return reached;
 }
 
 bool PathTrackingController::isOdomReceived() const

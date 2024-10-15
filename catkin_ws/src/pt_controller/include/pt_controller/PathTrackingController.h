@@ -20,6 +20,7 @@ public:
         double lookahead_distance,
         double max_linear_speed,
         double max_angular_speed,
+        double goal_tolerance,
         ControllerActionCallback controller_action_callback);
 
     void setPath(const nav_msgs::Path &path);
@@ -47,7 +48,8 @@ private:
     double lookahead_distance_;
     double max_linear_speed_;
     double max_angular_speed_;
-    
+    double goal_tolerance_;
+
     ControllerActionCallback controller_action_callback_;
 
     bool path_received_;

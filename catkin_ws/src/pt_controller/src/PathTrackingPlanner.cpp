@@ -93,6 +93,8 @@ void PathTrackingPlanner::stateMonitor()
         if (controller_->isReachGoal())
         {
             updateState(SUCCESS_END_PATH);
+            controller_->stopRobot();
+            running_.store(false);
         }
     }
 }

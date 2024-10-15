@@ -11,11 +11,13 @@ public:
         double lookahead_distance,
         double max_linear_speed,
         double max_angular_speed,
+        double goal_tolerance,
         double frequency)
         : path_tracking_controller_(
               lookahead_distance,
               max_linear_speed,
               max_angular_speed,
+              goal_tolerance,
               std::bind(&PathTrackingNode::sendVelocitiesCallback, this, std::placeholders::_1, std::placeholders::_2)),
           path_tracking_planner_(frequency, &path_tracking_controller_)
 
@@ -86,6 +88,7 @@ int main(int argc, char **argv)
     double lookahead_distance;
     double max_linear_speed;
     double max_angular_speed;
+    double goal_tolearance;
     double frequency;
 
     if (!nh.getParam("lookahead_distance", lookahead_distance))
@@ -106,6 +109,12 @@ int main(int argc, char **argv)
         max_angular_speed = 0.5;
     }
 
+    if (!nh.getParam("goal_tolerance", goal_tolearance))
+    {
+        ROS_WARN("goal_tolerance param not found, using default value of 0.1");
+        goal_tolearance = 0.1;
+    }
+
     if (!nh.getParam("frequency", frequency))
     {
         ROS_WARN("frequency param not found, using default value of 10.0");
@@ -115,9 +124,10 @@ int main(int argc, char **argv)
     ROS_INFO("lookahead_distance: %.2f", lookahead_distance);
     ROS_INFO("max_linear_speed: %.2f", max_linear_speed);
     ROS_INFO("max_angular_speed: %.2f", max_angular_speed);
+    ROS_INFO("goal_tolerance: %.2f", goal_tolearance);
     ROS_INFO("frequency: %.2f", frequency);
 
-    PathTrackingNode node(lookahead_distance, max_linear_speed, max_angular_speed, frequency);
+    PathTrackingNode node(lookahead_distance, max_linear_speed, max_angular_speed, goal_tolearance, frequency);
 
     ros::spin();
     return 0;
