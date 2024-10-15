@@ -21,7 +21,7 @@ The `pt_controller` package contains the implementation of a path-tracking contr
 - **Path Tracking Planner**: Plans the path for the vehicle to follow.
 - **Path Tracking Controller**: Controls the vehicle to follow the planned path by adjusting linear and angular velocities dynamically.
 
-### Architecture and Code Design
+## Architecture and Code Design
 
 The `pt_controller` package is designed with a modular architecture to separate the concerns of path planning and path following. The main components are the `PathTrackingPlanner` and the `PathTrackingController`.
 
@@ -66,7 +66,7 @@ std::vector<double> PathTrackingController::computeControlAction(
 }
 ```
 
-### PathTrackingPlanner
+#### PathTrackingPlanner
 
 The `PathTrackingPlanner` class in the `pt_controller` package manages the state of the path tracking process for the Polaris GEM e2 vehicle. It does not directly compute path calculations but instead oversees the execution of path tracking based on the current state of path and odometry data availability, and vehicle's goal-reaching status.
 
@@ -94,7 +94,7 @@ PathTrackingPlanner planner(10.0, &controller, [&](PathTrackingState state){
 planner.execute();
 ```
 
-### Design Choices
+#### Design Choices
 
 - **Modular Design**: The simulation and control logic are separated into distinct packages (`polaris_sim_utils` for simulation utilities and `pt_controller` for path tracking). This makes the system more flexible and scalable for future developments.
   
