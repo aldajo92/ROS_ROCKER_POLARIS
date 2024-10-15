@@ -126,7 +126,7 @@ add_library(path_tracking_controller
 )
 
 add_library(planner_path_tracking
-  src/PlannerPathTracking.cpp
+  src/PathTrackingPlanner.cpp
 )
 
 ## Add cmake target dependencies of the library

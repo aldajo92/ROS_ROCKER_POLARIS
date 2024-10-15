@@ -1,17 +1,18 @@
 #include <ros/ros.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
-#include "pt_controller/pathTrackingController.h"
+#include "pt_controller/PathTrackingController.h"
+#include "pt_controller/PathTrackingPlanner.h"
 
 class PathTrackingNode
 {
 public:
     PathTrackingNode(double lookahead_distance, double max_linear_speed, double wheelbase)
         : path_tracking_controller_(
-            lookahead_distance, 
-            max_linear_speed, 
-            wheelbase, 
-            std::bind(&PathTrackingNode::sendVelocitiesCallback, this, std::placeholders::_1, std::placeholders::_2))
+              lookahead_distance,
+              max_linear_speed,
+              wheelbase,
+              std::bind(&PathTrackingNode::sendVelocitiesCallback, this, std::placeholders::_1, std::placeholders::_2))
     {
         path_sub_ = nh_.subscribe("/gps_path", 10, &PathTrackingNode::pathCallback, this);
         odom_sub_ = nh_.subscribe("/gem/base_footprint/odom", 10, &PathTrackingNode::odomCallback, this);
@@ -84,8 +85,10 @@ int main(int argc, char **argv)
     nh.param("max_linear_speed", max_linear_speed, 2.0);
     nh.param("wheelbase", wheelbase, 1.75);
 
-    PathTrackingNode node(lookahead_distance, max_linear_speed, wheelbase);
-    
+    // PathTrackingNode node(lookahead_distance, max_linear_speed, wheelbase);
+    PathTrackingPlanner planner;
+    planner.execute();
+
     ros::spin();
     return 0;
 }
