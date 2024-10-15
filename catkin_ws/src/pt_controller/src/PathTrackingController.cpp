@@ -38,7 +38,7 @@ void PathTrackingController::setOdom(const nav_msgs::Odometry &odom)
 {
     if (!path_received_)
     {
-        ROS_WARN("No path to follow.");
+        // ROS_WARN("No path to follow.");
         return;
     }
 
@@ -52,7 +52,7 @@ std::pair<double, int> PathTrackingController::calculateMinDistanceInPath(
 {
     if (position.size() != 2)
     {
-        ROS_WARN("Position vector must have exactly 2 elements (x, y).");
+        // ROS_WARN("Position vector must have exactly 2 elements (x, y).");
         return {std::numeric_limits<double>::max(), -1}; // Return invalid result
     }
 
@@ -84,7 +84,7 @@ std::vector<double> PathTrackingController::computeControlAction(
 {
     if (position.size() != 3)
     {
-        ROS_INFO("Position vector must have exactly 3 elements (x, y, yaw).");
+        // ROS_INFO("Position vector must have exactly 3 elements (x, y, yaw).");
         return {0.0, 0.0};
     }
 
@@ -116,7 +116,7 @@ void PathTrackingController::computeControlCommand()
 {
     double robot_x = current_odometry_.pose.pose.position.x;
     double robot_y = current_odometry_.pose.pose.position.y;
-    double robot_yaw = tf::getYaw(current_odometry_.pose.pose.orientation);
+    double robot_yaw = getYawFromQuaternion(current_odometry_.pose.pose.orientation);
 
     std::pair<double, int> min_distance_index = calculateMinDistanceInPath({robot_x, robot_y}, path_);
 
@@ -238,4 +238,11 @@ void PathTrackingController::stopRobot()
     {
         controller_action_callback_(0.0, 0.0);
     }
+}
+
+double PathTrackingController::getYawFromQuaternion(const geometry_msgs::Quaternion &q)
+{
+    double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+    double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+    return std::atan2(siny_cosp, cosy_cosp);
 }

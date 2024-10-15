@@ -80,8 +80,8 @@ The `PathTrackingPlanner` class in the `pt_controller` package manages the state
 
 1. **Initialization**: Starts in the INIT state and checks for controller availability.
 2. **State Monitoring**: Continuously monitors and updates the state based on path and odometry data availability:
-   - **MISSING_PATH**: Triggered if path data is missing.
-   - **MISSING_ODOM**: Triggered if odometry data is missing.
+   - **WAITING_PATH**: Triggered if path data is missing.
+   - **WAITING_ODOM**: Triggered if odometry data is missing.
    - **FOLLOW_PATH**: Engaged when both path and odometry data are sufficient for path tracking.
 3. **Error Handling and Goal Achievement**: Manages errors and checks if the goal is reached, stopping the vehicle if necessary.
 

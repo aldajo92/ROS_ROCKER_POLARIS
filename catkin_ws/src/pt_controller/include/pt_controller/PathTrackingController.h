@@ -1,14 +1,13 @@
 #ifndef PATH_TRACKING_CONTROLLER_H
 #define PATH_TRACKING_CONTROLLER_H
 
-#include <ros/ros.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Pose.h>
-#include <tf/tf.h>
 #include <utility>
 #include <cmath>
 #include <functional>
+#include <chrono>
 
 using ControllerActionCallback = std::function<void(double, double)>;
 
@@ -59,6 +58,8 @@ public:
 
     bool isOdomReceived() const;
     bool isPathReceived() const;
+
+    double getYawFromQuaternion(const geometry_msgs::Quaternion &q);
 
 private:
     nav_msgs::Path path_;

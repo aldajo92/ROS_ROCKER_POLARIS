@@ -46,10 +46,10 @@ std::string PathTrackingPlanner::stateToString(PathTrackingState state) const
         return "INIT";
     case FOLLOW_PATH:
         return "FOLLOW_PATH";
-    case MISSING_ODOM:
-        return "MISSING_ODOM";
-    case MISSING_PATH:
-        return "MISSING_PATH";
+    case WAITING_ODOM:
+        return "WAITING_ODOM";
+    case WAITING_PATH:
+        return "WAITING_PATH";
     case ERROR:
         return "ERROR";
     case SUCCESS_END_PATH:
@@ -76,13 +76,13 @@ void PathTrackingPlanner::stateMonitor()
 
         if (!controller_->isPathReceived())
         {
-            updateState(MISSING_PATH);
+            updateState(WAITING_PATH);
             continue;
         }
 
         if (!controller_->isOdomReceived())
         {
-            updateState(MISSING_ODOM);
+            updateState(WAITING_ODOM);
             continue;
         }
 
