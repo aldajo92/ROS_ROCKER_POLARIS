@@ -9,7 +9,9 @@ project(pt_controller)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  std_msgs
+  nav_msgs
+  geometry_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,9 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES pt_controller
-#  CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
+  LIBRARIES pt_controller
+  CATKIN_DEPENDS roscpp nav_msgs geometry_msgs tf
 )
 
 ###########
@@ -120,9 +121,13 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/pt_controller.cpp
-# )
+add_library(path_tracking_controller
+  src/PathTrackingController.cpp
+)
+
+add_library(planner_path_tracking
+  src/PlannerPathTracking.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -132,8 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(path_tracking_controller_node src/path_tracking_controller_node.cpp)
-add_executable(path_tracking_node src/path_tracking_node.cpp)
+add_executable(path_tracking_node src/PathTrackingNode.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -143,12 +147,9 @@ add_executable(path_tracking_node src/path_tracking_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(path_tracking_controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(path_tracking_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-
-target_link_libraries(path_tracking_controller_node ${catkin_LIBRARIES})
 target_link_libraries(path_tracking_node ${catkin_LIBRARIES})
 
 #############
@@ -198,10 +199,27 @@ target_link_libraries(path_tracking_node ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_pt_controller.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
+target_link_libraries(path_tracking_node
+  planner_path_tracking
+  path_tracking_controller
+  ${catkin_LIBRARIES}
+)
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  find_package(GTest REQUIRED)
+  include_directories(include ${catkin_INCLUDE_DIRS})
+
+  catkin_add_gtest(${PROJECT_NAME}_test
+    test/test_path_tracking_controller.cpp
+    src/PathTrackingController.cpp
+  )
+
+  # catkin_add_gtest(
+  #   test_path_tracking_controller test/test_path_tracking_controller.cpp)
+  # target_link_libraries(test_path_tracking_controller ${PROJECT_NAME} ${catkin_LIBRARIES} ${GTEST_LIBRARIES} pthread)
+  target_link_libraries(${PROJECT_NAME}_test ${catkin_LIBRARIES})
+endif()

@@ -1,4 +1,8 @@
 <launch>
   <node pkg="polaris_sim_utils" type="waypoints_publisher" name="waypoints_publisher_node" />
-  <node pkg="pt_controller" type="path_tracking_node" name="path_tracking_controller" output="screen" />
+   <node pkg="pt_controller" type="path_tracking_node" name="path_tracking_controller" output="screen">
+        <param name="lookahead_distance" value="2.0" />
+        <param name="max_linear_speed" value="2.0" />
+        <param name="wheelbase" value="1.75" />
+    </node>
 </launch>
