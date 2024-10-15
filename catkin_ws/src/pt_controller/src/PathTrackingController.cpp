@@ -25,7 +25,6 @@ void PathTrackingController::setPath(const nav_msgs::Path &path)
     {
         path_ = path;
         path_received_ = true;
-        ROS_INFO("Path received with %ld waypoints.", path_.poses.size());
 
         if (!starting_point_set_ && !path_.poses.empty())
         {
@@ -53,7 +52,7 @@ std::pair<double, int> PathTrackingController::calculateMinDistanceInPath(
 {
     if (position.size() != 2)
     {
-        ROS_INFO("Position vector must have exactly 2 elements (x and y).");
+        ROS_WARN("Position vector must have exactly 2 elements (x, y).");
         return {std::numeric_limits<double>::max(), -1}; // Return invalid result
     }
 
@@ -185,17 +184,17 @@ void PathTrackingController::computeControlCommand()
     {
         last_log_time_ = std::chrono::system_clock::now();
 
-        ROS_INFO("---- Pure Pursuit Controller ----");
-        ROS_INFO("Robot Position: (x=%.2f, y=%.2f), Yaw: %.2f", robot_x, robot_y, robot_yaw);
-        ROS_INFO("Closest Path Point Index: %d", closest_point_index);
-        ROS_INFO("Lookahead Point: (x=%.2f, y=%.2f)", lookahead_point.x, lookahead_point.y);
-        ROS_INFO("Alpha (Heading Error): %.2f", alpha);
-        ROS_INFO("Curvature (kappa): %.2f", kappa);
-        ROS_INFO("Distance: %.2f", distance);
-        ROS_INFO("Linear Speed: %.2f", linear_speed);
-        ROS_INFO("Angular Speed: %.2f", angular_speed);
-        ROS_INFO("Angle diff: %.2f", angle_diff);
-        ROS_INFO("----------------------------------");
+        // ROS_INFO("---- Pure Pursuit Controller ----");
+        // ROS_INFO("Robot Position: (x=%.2f, y=%.2f), Yaw: %.2f", robot_x, robot_y, robot_yaw);
+        // ROS_INFO("Closest Path Point Index: %d", closest_point_index);
+        // ROS_INFO("Lookahead Point: (x=%.2f, y=%.2f)", lookahead_point.x, lookahead_point.y);
+        // ROS_INFO("Alpha (Heading Error): %.2f", alpha);
+        // ROS_INFO("Curvature (kappa): %.2f", kappa);
+        // ROS_INFO("Distance: %.2f", distance);
+        // ROS_INFO("Linear Speed: %.2f", linear_speed);
+        // ROS_INFO("Angular Speed: %.2f", angular_speed);
+        // ROS_INFO("Angle diff: %.2f", angle_diff);
+        // ROS_INFO("----------------------------------");
     }
 }
 
@@ -214,9 +213,9 @@ bool PathTrackingController::isReachGoal() const
     double dy = robot_y - last_point.y;
     double distance = std::sqrt(dx * dx + dy * dy);
     
-    ROS_INFO("---- Error Measure ----");
-    ROS_INFO("Distance: %.2f", distance);
-    ROS_INFO("----------------------------------");
+    // ROS_INFO("---- Error Measure ----");
+    // ROS_INFO("Distance: %.2f", distance);
+    // ROS_INFO("----------------------------------");
     
     bool reached = distance <= goal_tolerance_;
 

@@ -4,12 +4,12 @@
 #include <thread>
 
 PathTrackingPlanner::PathTrackingPlanner(double frequency)
-    : current_state_(INIT), running_(false), frequency_(frequency), controller_(nullptr)
+    : current_state_(INIT), running_(false), frequency_(frequency), controller_(nullptr), state_callback_()
 {
 }
 
-PathTrackingPlanner::PathTrackingPlanner(double frequency, AbstractPathTrackingController *controller)
-    : current_state_(INIT), running_(false), frequency_(frequency), controller_(controller)
+PathTrackingPlanner::PathTrackingPlanner(double frequency, AbstractPathTrackingController *controller, PathTrackingStateCallback state_callback)
+    : current_state_(INIT), running_(false), frequency_(frequency), controller_(controller), state_callback_(state_callback)
 {
 }
 
@@ -102,5 +102,8 @@ void PathTrackingPlanner::stateMonitor()
 void PathTrackingPlanner::updateState(PathTrackingState state)
 {
     current_state_ = state;
-    std::cout << "Current state: " << stateToString(current_state_) << std::endl;
+    if (state_callback_)
+    {
+        state_callback_(current_state_);
+    }
 }

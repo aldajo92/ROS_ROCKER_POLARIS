@@ -19,7 +19,11 @@ public:
               max_angular_speed,
               goal_tolerance,
               std::bind(&PathTrackingNode::sendVelocitiesCallback, this, std::placeholders::_1, std::placeholders::_2)),
-          path_tracking_planner_(frequency, &path_tracking_controller_)
+          path_tracking_planner_(
+            frequency, 
+            &path_tracking_controller_,
+            std::bind(&PathTrackingNode::stateCallback, this, std::placeholders::_1)
+            )
 
     {
         path_sub_ = nh_.subscribe("/gps_path", 10, &PathTrackingNode::pathCallback, this);
@@ -53,6 +57,11 @@ public:
         cmd_vel.linear.x = linear_velocity;
         cmd_vel.angular.z = angular_velocity;
         cmd_vel_pub_.publish(cmd_vel);
+    }
+
+    void stateCallback(const PathTrackingState &state)
+    {
+        ROS_INFO("Current state: %s", path_tracking_planner_.stateToString(state).c_str());
     }
 
     void updateTraveledPath(const nav_msgs::Odometry &odometry)
