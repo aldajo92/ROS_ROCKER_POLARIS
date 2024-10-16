@@ -2,6 +2,8 @@
 
 This repository contains two main packages for ROS Noetic: `polaris_sim_utils` and `pt_controller`. These packages are designed to work together to provide utilities for the Polaris GEM e2 vehicle and to control its path tracking in a ROS environment.
 
+![](./.media/polaris_gazebo.png)
+
 ## Polaris Simulation Utilities
 
 The `polaris_sim_utils` package contains utilities and tools to launch the Polaris GEM e2 vehicle and generate some helper paths to validate the controllers provided by the `pt_controller` package.
@@ -167,11 +169,17 @@ roslaunch polaris_sim_utils pt_controller_gazebo.launch
 ./scripts_prod/run
 ```
 
-### Videos
+## Videos
 
 - **Path Tracking Controller in Action**: [Path Tracking Controller Video 1](https://www.youtube.com/watch?v=4YP2Vtt6SmI)
 
 - **Path Tracking Controller for a Sinus Path**: [Path Tracking Controller Video 2](https://www.youtube.com/watch?v=r4IYHgJRjiA)
+
+## GithubActions
+
+This repository is integrated with GithubActions to run the tests and validate the build for the [pt_controller](./catkin_ws/src/pt_controller/) ROS package for every pull request. The workflow can be found at [ros_pt_controller.yml](./.github/workflows/ros_pt_controller.yml).
+
+![](./.media/workflow.png)
 
 ### Author
 Alejandro Daniel José Gómez Flórez (aldajo92)
