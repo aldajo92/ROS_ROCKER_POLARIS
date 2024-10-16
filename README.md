@@ -78,6 +78,13 @@ The [PathTrackingPlanner](./catkin_ws/src/pt_controller/src/PathTrackingPlanner.
 - **Threaded Execution**: Runs its monitoring logic in a separate thread to regularly check the status and progression of path tracking.
 - **Control Delegation**: Delegates the computation of control commands to the `PathTrackingController`, ensuring that actions are based on the latest available data.
 
+#### PathTrackingNode
+PathTrackingNode is the ROS node provided that integrates the PathTrackingPlanner and PathTrackingController. It subscribes to the path and odometry topics, updates the planner's state based on the received data, and publishes the control commands to the vehicle.
+
+An example of the usage of the PathTrackingNode can be found in the launcher file [pt_controller_example](./catkin_ws/src/pt_controller/launch/pt_controller_example.launch)
+
+![](./.media/node_graph.png)
+
 #### Workflow Description
 
 1. **Initialization**: Starts in the INIT state and checks for controller availability.
@@ -159,7 +166,7 @@ It is important to source the ROS packages to use the ROS commands. The alias de
 
 **Launching the Simulation and Path Tracking Controller:**
 
-After run the container, a bash terminal will be opened. Then, you can launch the simulation and the path tracking controller with the following commands:
+After run the container, a bash terminal will be opened. Then, you can launch the simulation and the path tracking controller, based on the launcher file [pt_controller_gazebo.launch](./catkin_ws/src/polaris_sim_utils/launch/pt_controller_gazebo.launch), with the following commands:
 ```bash
 roslaunch polaris_sim_utils pt_controller_gazebo.launch
 ```
