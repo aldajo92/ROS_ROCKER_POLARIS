@@ -1,7 +1,4 @@
 #include "pt_controller/PathTrackingPlanner.h"
-#include <iostream>
-#include <chrono>
-#include <thread>
 
 PathTrackingPlanner::PathTrackingPlanner(double frequency)
     : current_state_(INIT), running_(false), frequency_(frequency), controller_(nullptr), state_callback_()
@@ -46,6 +43,8 @@ std::string PathTrackingPlanner::stateToString(PathTrackingState state) const
         return "INIT";
     case FOLLOW_PATH:
         return "FOLLOW_PATH";
+    case NO_INPUT_DATA:
+        return "NO_INPUT_DATA";
     case WAITING_ODOM:
         return "WAITING_ODOM";
     case WAITING_PATH:
@@ -62,7 +61,6 @@ std::string PathTrackingPlanner::stateToString(PathTrackingState state) const
 void PathTrackingPlanner::stateMonitor()
 {
     updateState(INIT);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     if (controller_ == nullptr)
     {
@@ -74,13 +72,19 @@ void PathTrackingPlanner::stateMonitor()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(1000 / frequency_)));
 
-        if (!controller_->isPathReceived())
+        if (!controller_->isOdomReceived() && !controller_->isPathReceived())
+        {
+            updateState(NO_INPUT_DATA);
+            continue;
+        }
+
+        if (!controller_->isPathReceived() && controller_->isOdomReceived())
         {
             updateState(WAITING_PATH);
             continue;
         }
 
-        if (!controller_->isOdomReceived())
+        if (!controller_->isOdomReceived() && controller_->isPathReceived())
         {
             updateState(WAITING_ODOM);
             continue;
