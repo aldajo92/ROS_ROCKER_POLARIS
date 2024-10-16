@@ -6,36 +6,27 @@ from geometry_msgs.msg import PoseStamped
 
 class PathPublisher:
     def __init__(self):
-        # Initialize the ROS node
         rospy.init_node('path_publisher', anonymous=True)
         
-        # Publisher for the path
         self.path_pub = rospy.Publisher('/gps_path', Path, queue_size=10)
         
-        # Generate waypoints
         self.path = self.generate_path()
-        
-        # Timer to publish the path at a fixed rate
         self.timer = rospy.Timer(rospy.Duration(5), self.publish_path)
 
     def generate_path(self):
-        # Create a Path message
         path = Path()
-        path.header.frame_id = "base_footprint"  # Set the reference frame
+        path.header.frame_id = "base_footprint"
         
-        # Create a simple straight line path
-        for i in range(0, 21):  # Generates points from 0 to 10 with a step of 0.5
+        for i in range(0, 21):
             pose = PoseStamped()
-            pose.header.frame_id = "base_footprint"  # Set the reference frame
+            pose.header.frame_id = "base_footprint"
             pose.header.stamp = rospy.Time.now()
 
-            # Set position (x, y, z)
-            pose.pose.position.x = i * 3  # X coordinate
+            pose.pose.position.x = i * 3     # X coordinate
             pose.pose.position.y = 0.0       # Y coordinate
             pose.pose.position.z = 0.0       # Z coordinate
 
-            # Set orientation (quaternion)
-            pose.pose.orientation.w = 1.0     # No rotation (facing along x-axis)
+            pose.pose.orientation.w = 1.0
             pose.pose.orientation.x = 0.0
             pose.pose.orientation.y = 0.0
             pose.pose.orientation.z = 0.0
@@ -45,12 +36,12 @@ class PathPublisher:
         return path
 
     def publish_path(self, event):
-        self.path.header.stamp = rospy.Time.now()  # Update timestamp
-        self.path_pub.publish(self.path)  # Publish the path
+        self.path.header.stamp = rospy.Time.now()
+        self.path_pub.publish(self.path)
 
 if __name__ == '__main__':
     try:
         path_publisher = PathPublisher()
-        rospy.spin()  # Keep the node running
+        rospy.spin()
     except rospy.ROSInterruptException:
         pass
