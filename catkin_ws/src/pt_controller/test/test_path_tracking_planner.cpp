@@ -31,6 +31,82 @@ TEST(PathTrackingPlannerTest, InitialState)
     EXPECT_EQ(planner.getState(), INIT);
 }
 
+TEST(PathTrackingPlannerTest, NoInputDataState)
+{
+    MockPathTrackingController mock_controller;
+    PathTrackingPlanner planner(10.0, &mock_controller, nullptr);
+
+    mock_controller.setPathReceived(false);
+    mock_controller.setOdomReceived(false);
+
+    planner.execute();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    planner.stop();
+
+    EXPECT_EQ(planner.getState(), NO_INPUT_DATA);
+}
+
+TEST(PathTrackingPlannerTest, WaitingPathState)
+{
+    MockPathTrackingController mock_controller;
+    PathTrackingPlanner planner(10.0, &mock_controller, nullptr);
+
+    mock_controller.setPathReceived(false);
+    mock_controller.setOdomReceived(true);
+
+    planner.execute();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    planner.stop();
+
+    EXPECT_EQ(planner.getState(), WAITING_PATH);
+}
+
+TEST(PathTrackingPlannerTest, WaitingOdomState)
+{
+    MockPathTrackingController mock_controller;
+    PathTrackingPlanner planner(10.0, &mock_controller, nullptr);
+
+    mock_controller.setPathReceived(true);
+    mock_controller.setOdomReceived(false);
+
+    planner.execute();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    planner.stop();
+
+    EXPECT_EQ(planner.getState(), WAITING_ODOM);
+}
+
+TEST(PathTrackingPlannerTest, FollowPathState)
+{
+    MockPathTrackingController mock_controller;
+    PathTrackingPlanner planner(10.0, &mock_controller, nullptr);
+
+    mock_controller.setPathReceived(true);
+    mock_controller.setOdomReceived(true);
+
+    planner.execute();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    planner.stop();
+
+    EXPECT_EQ(planner.getState(), FOLLOW_PATH);
+}
+
+TEST(PathTrackingPlannerTest, ReachGoalState)
+{
+    MockPathTrackingController mock_controller;
+    PathTrackingPlanner planner(10.0, &mock_controller, nullptr);
+
+    mock_controller.setPathReceived(true);
+    mock_controller.setOdomReceived(true);
+    mock_controller.setReachGoal(true);
+
+    planner.execute();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    planner.stop();
+
+    EXPECT_EQ(planner.getState(), SUCCESS_END_PATH);
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
