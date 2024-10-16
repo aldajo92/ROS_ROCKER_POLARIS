@@ -189,9 +189,11 @@ The [pt_controller](./catkin_ws/src/pt_controller) package can be exported to RO
 
 ### Videos
 
-- **Path Tracking Controller in Action**: [Path Tracking Controller Video 1](https://www.youtube.com/watch?v=4YP2Vtt6SmI)
+- **Repo configurations**: [Path Tracking Controller Video 1](https://www.youtube.com/watch?v=fExSugpAcuE)
 
-- **Path Tracking Controller for a Sinus Path**: [Path Tracking Controller Video 2](https://www.youtube.com/watch?v=r4IYHgJRjiA)
+- **Path Tracking Controller in Action**: [Path Tracking Controller Video 2](https://www.youtube.com/watch?v=4YP2Vtt6SmI)
+
+- **Path Tracking Controller for a Sinus Path**: [Path Tracking Controller Video 3](https://www.youtube.com/watch?v=r4IYHgJRjiA)
 
 ## GithubActions
 

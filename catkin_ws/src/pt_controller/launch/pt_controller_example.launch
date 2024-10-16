@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="pt_controller" type="path_tracking_node" name="path_tracking_controller" output="screen">
+        <param name="lookahead_distance" type="double" value="2.0" />
+        <param name="max_linear_speed" type="double" value="2.0" />
+        <param name="max_angular_speed" type="double" value="1.0" />
+        <param name="goal_tolerance" type="double" value="0.2" />
+        <param name="frequency" type="double" value="10.0" />
+
+        <param name="path_topic" type="string" value="/gps_path" />
+        <param name="odom_topic" type="string" value="/odom" />
+        <param name="cmd_vel_topic" type="string" value="/cmd_vel" />
+        <param name="traveled_path_topic" type="string" value="/traveled_path" />
+        <param name="traveled_path_frame_id" type="string" value="base_footprint" />
+
+  </node>
+</launch>
