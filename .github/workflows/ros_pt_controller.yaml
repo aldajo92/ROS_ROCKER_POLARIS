@@ -1,0 +1,39 @@
+name: ROS Noetic pt_controller CI
+
+on: pull_request
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: ros:noetic-ros-base
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt update && apt-get install -y \
+          ros-noetic-roscpp \
+          ros-noetic-std-msgs \
+          ros-noetic-nav-msgs \
+          ros-noetic-geometry-msgs \
+          ros-noetic-rostest \
+          ros-noetic-catkin \
+          python3-catkin-tools && \
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Prepare ROS workspace
+        run: |
+          mkdir -p /catkin_ws/src
+          cp -r ${GITHUB_WORKSPACE}/catkin_ws/src/pt_controller /catkin_ws/src/
+          /bin/bash -c "source /opt/ros/noetic/setup.bash && cd /catkin_ws && catkin build"
+
+      - name: Build Package
+        run: |
+          /bin/bash -c "source /opt/ros/noetic/setup.bash && cd /catkin_ws && catkin build"
+
+      - name: Run Tests
+        run: |
+          /bin/bash -c "source /opt/ros/noetic/setup.bash && cd /catkin_ws && catkin test"
+

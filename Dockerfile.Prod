@@ -8,7 +8,6 @@ RUN apt update && apt-get install -y \
   ros-${ROS_DISTRO}-std-msgs \
   ros-${ROS_DISTRO}-nav-msgs \
   ros-${ROS_DISTRO}-geometry-msgs \
-  ros-${ROS_DISTRO}-tf \
   ros-${ROS_DISTRO}-rostest \
   ros-${ROS_DISTRO}-catkin \
   python3-catkin-tools \
