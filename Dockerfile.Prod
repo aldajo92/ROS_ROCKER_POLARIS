@@ -3,8 +3,6 @@ FROM ros:noetic-ros-base
 ENV ROS_DISTRO=noetic
 ENV WS=/catkin_ws
 
-RUN mkdir -p ${WS}/src
-
 RUN apt update && apt-get install -y \
   ros-${ROS_DISTRO}-roscpp \
   ros-${ROS_DISTRO}-std-msgs \
@@ -17,7 +15,7 @@ RUN apt update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /catkin_ws/src
-COPY catkin_ws/src/pt_controller /catkin_ws/src/pt_controller
+COPY catkin_ws/src/pt_controller ${WS}/src/pt_controller
 
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${WS} && catkin build"
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${WS} && catkin test"
