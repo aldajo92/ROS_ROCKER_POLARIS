@@ -138,6 +138,16 @@ After building the Docker.Desktop environment, you can run the container with th
 ./scripts/run_nvidia ## Use the CPU without Nvidia GPU acceleration
 ```
 
+**Build the ROS packages:**
+The container will open a bash terminal. And you will have the shared catkin_ws folder to interac with the sourcecode. You can build the ROS packages with the following commands:
+
+```bash
+bros ## It is an alias to build the ROS packages.
+sros ## It is an alias to source the ROS packages.
+```
+
+It is important to source the ROS packages to use the ROS commands. The alias definitions can be found at the end of [Docker.Dekstop](./Dockerfile.Desktop) file.
+
 **Launching the Simulation and Path Tracking Controller:**
 
 After run the container, a bash terminal will be opened. Then, you can launch the simulation and the path tracking controller with the following commands:
