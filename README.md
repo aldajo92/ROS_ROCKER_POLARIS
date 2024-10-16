@@ -123,6 +123,13 @@ This project is based on containers with [ROCKER](https://github.com/osrf/rocker
 
 ### For Desktop Environment
 
+**Update submodules:**
+This dekstop environment depends on the [POLARIS_GEM_e2](https://gitlab.engr.illinois.edu/gemillins/POLARIS_GEM_e2) package wich is included as a submodule. To make sure to have the latest version of this repository at [catkin_ws/src](./catkin_ws/src) folder, you can run the following command:
+
+```bash
+git submodule update --init --recursive
+```
+
 **Build the Docker.Desktop environment:**
 
 To build the Docker.Desktop environment, you can run the following command:
