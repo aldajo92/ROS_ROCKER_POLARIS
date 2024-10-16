@@ -23,11 +23,11 @@ The `pt_controller` package contains the implementation of a path-tracking contr
 
 ## Architecture and Code Design
 
-The `pt_controller` package is designed with a modular architecture to separate the concerns of path planning and path following. The main components are the `PathTrackingPlanner` and the `PathTrackingController`.
+The [pt_controller](./catkin_ws/src/pt_controller) package is designed with a modular architecture to separate the concerns of path planning and path following. The main components are the [PathTrackingPlanner](./catkin_ws/src/pt_controller/src/PathTrackingPlanner.cpp) and the [PathTrackingController](./catkin_ws/src/pt_controller/src/PathTrackingController.cpp).
 
 #### PathTrackingController
 
-The `PathTrackingController` is responsible for generating the control actions (linear and angular velocities) that guide the vehicle along the path. It calculates control actions using a feedback control algorithm based on the Pure Pursuit technique.
+The [PathTrackingController](./catkin_ws/src/pt_controller/src/PathTrackingController.cpp) is responsible for generating the control actions (linear and angular velocities) that guide the vehicle along the path. It calculates control actions using a feedback control algorithm based on the Pure Pursuit technique.
 
 **Example Code:**
 
@@ -68,7 +68,7 @@ std::vector<double> PathTrackingController::computeControlAction(
 
 #### PathTrackingPlanner
 
-The `PathTrackingPlanner` class in the `pt_controller` package manages the state of the path tracking process for the Polaris GEM e2 vehicle. It does not directly compute path calculations but instead oversees the execution of path tracking based on the current state of path and odometry data availability, and vehicle's goal-reaching status.
+The [PathTrackingPlanner](./catkin_ws/src/pt_controller/src/PathTrackingPlanner.cpp) manages the state for the [PathTrackingController](./catkin_ws/src/pt_controller/src/PathTrackingController.cpp). It handle the execution of path tracking based on the current state of path and odometry data availability, and vehicle's goal-reaching status.
 
 #### Key Components and Functionality
 
@@ -82,6 +82,7 @@ The `PathTrackingPlanner` class in the `pt_controller` package manages the state
 2. **State Monitoring**: Continuously monitors and updates the state based on path and odometry data availability:
    - **WAITING_PATH**: Triggered if path data is missing.
    - **WAITING_ODOM**: Triggered if odometry data is missing.
+   
    - **FOLLOW_PATH**: Engaged when both path and odometry data are sufficient for path tracking.
 3. **Error Handling and Goal Achievement**: Manages errors and checks if the goal is reached, stopping the vehicle if necessary.
 
@@ -100,20 +101,61 @@ planner.execute();
   
 - **Path Following with Pure Pursuit**: The control strategy for path tracking leverages the Pure Pursuit algorithm, which is simple yet effective for real-time control of autonomous vehicles. By dynamically adjusting the speed based on alignment, the controller ensures smooth and adaptive path following.
 
-### Installation
+## Dockerfile
 
-For detailed installation instructions, please follow the steps provided in this repository: [ROS_Rocker_Turtlebot3SimNoetic](https://github.com/aldajo92/ROS_Rocker_Turtlebot3SimNoetic)
+This project includes two Dockerfiles for different purposes:
 
-### Usage
+### Dockerfile.Desktop
 
-**Launching the Simulation and Path Tracking Controller:**
+The Dockerfile.Desktop configures a ROS Noetic environment tailored for the Polaris GEM e2 vehicle, featuring a full desktop installation. This setup includes all necessary dependencies and tools required for the development of the path-tracking controller.
+
+### Dockerfile.Prod
+
+The `Dockerfile.Prod` establishes a minimal ROS Noetic environment, including core packages and dependencies necessary for the [pt_controller](./catkin_ws/src/pt_controller/) ROS package.
+
+## Installation
+
+This project is based on containers with [ROCKER](https://github.com/osrf/rocker). For detailed installation instructions, please follow the steps provided in this repository to run the graphical interface [ROS_Rocker_Turtlebot3SimNoetic](https://github.com/aldajo92/ROS_Rocker_Turtlebot3SimNoetic).
+
+## Usage
+
+### For Desktop Environment
+
+**Build the Docker.Desktop environment:**
+
+To build the Docker.Desktop environment, you can run the following command:
+
 ```bash
-roslaunch polaris_sim_utils polaris_gazebo.launch
+./scripts/build
 ```
 
-### Dockerfile
+**Run the Docker.Desktop environment:**
 
-The Docker setup allows easy deployment and testing of the project in different environments (Ubuntu and Mac OS). For Nvidia users, the Dockerfile is optimized to leverage GPU-based simulations with the Nvidia container toolkit using ROCKER (https://github.com/osrf/rocker).
+After building the Docker.Desktop environment, you can run the container with the following commands:
+
+```bash
+./scripts/run_cpu ## Use the CPU without Nvidia GPU acceleration
+./scripts/run_nvidia ## Use the CPU without Nvidia GPU acceleration
+```
+
+**Launching the Simulation and Path Tracking Controller:**
+
+After run the container, a bash terminal will be opened. Then, you can launch the simulation and the path tracking controller with the following commands:
+```bash
+roslaunch polaris_sim_utils pt_controller_gazebo.launch
+```
+
+### For Production Environment
+
+**Build the Docker.Prod environment:**
+```bash
+./scripts_prod/build
+```
+
+**Run the Docker.Prod environment:**
+```bash
+./scripts_prod/run
+```
 
 ### Videos
 
