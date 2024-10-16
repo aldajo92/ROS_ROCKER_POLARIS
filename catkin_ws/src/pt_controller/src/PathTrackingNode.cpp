@@ -8,6 +8,11 @@ class PathTrackingNode
 {
 public:
     PathTrackingNode(
+        const std::string &path_topic,
+        const std::string &odom_topic,
+        const std::string &cmd_vel_topic,
+        const std::string &traveled_path_topic,
+        const std::string &traveled_path_frame_id,
         double lookahead_distance,
         double max_linear_speed,
         double max_angular_speed,
@@ -20,19 +25,17 @@ public:
               goal_tolerance,
               std::bind(&PathTrackingNode::sendVelocitiesCallback, this, std::placeholders::_1, std::placeholders::_2)),
           path_tracking_planner_(
-            frequency, 
+            frequency,
             &path_tracking_controller_,
-            std::bind(&PathTrackingNode::stateCallback, this, std::placeholders::_1)
-            )
-
+            std::bind(&PathTrackingNode::stateCallback, this, std::placeholders::_1))
     {
-        path_sub_ = nh_.subscribe("/gps_path", 10, &PathTrackingNode::pathCallback, this);
-        odom_sub_ = nh_.subscribe("/gem/base_footprint/odom", 10, &PathTrackingNode::odomCallback, this);
+        path_sub_ = nh_.subscribe(path_topic, 10, &PathTrackingNode::pathCallback, this);
+        odom_sub_ = nh_.subscribe(odom_topic, 10, &PathTrackingNode::odomCallback, this);
 
-        cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/gem/cmd_vel", 10);
-        traveled_path_pub_ = nh_.advertise<nav_msgs::Path>("/traveled_path", 10);
+        cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>(cmd_vel_topic, 10);
+        traveled_path_pub_ = nh_.advertise<nav_msgs::Path>(traveled_path_topic, 10);
 
-        traveled_path_.header.frame_id = "base_footprint";
+        traveled_path_.header.frame_id = traveled_path_frame_id;
 
         // TODO: Move this to a safe place
         path_tracking_planner_.execute();
@@ -94,6 +97,39 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "path_tracking_node");
     ros::NodeHandle nh("~");
 
+    // Parameters for topics
+    std::string path_topic;
+    std::string odom_topic;
+    std::string cmd_vel_topic;
+    std::string traveled_path_topic;
+    std::string traveled_path_frame_id;
+
+    if (!nh.getParam("path_topic", path_topic))
+    {
+        path_topic = "/gps_path";
+    }
+
+    if (!nh.getParam("odom_topic", odom_topic))
+    {
+        odom_topic = "/odom";
+    }
+
+    if (!nh.getParam("cmd_vel_topic", cmd_vel_topic))
+    {
+        cmd_vel_topic = "/cmd_vel";
+    }
+
+    if (!nh.getParam("traveled_path_topic", traveled_path_topic))
+    {
+        traveled_path_topic = "/traveled_path";
+    }
+
+    if (!nh.getParam("traveled_path_frame_id", traveled_path_frame_id))
+    {
+        traveled_path_frame_id = "base_footprint";
+    }
+
+    // Parameter for path tracking controller
     double lookahead_distance;
     double max_linear_speed;
     double max_angular_speed;
@@ -130,13 +166,17 @@ int main(int argc, char **argv)
         frequency = 10.0;
     }
 
-    ROS_INFO("lookahead_distance: %.2f", lookahead_distance);
-    ROS_INFO("max_linear_speed: %.2f", max_linear_speed);
-    ROS_INFO("max_angular_speed: %.2f", max_angular_speed);
-    ROS_INFO("goal_tolerance: %.2f", goal_tolearance);
-    ROS_INFO("frequency: %.2f", frequency);
-
-    PathTrackingNode node(lookahead_distance, max_linear_speed, max_angular_speed, goal_tolearance, frequency);
+    PathTrackingNode node(
+        path_topic,
+        odom_topic,
+        cmd_vel_topic,
+        traveled_path_topic,
+        traveled_path_frame_id,
+        lookahead_distance,
+        max_linear_speed,
+        max_angular_speed,
+        goal_tolearance,
+        frequency);
 
     ros::spin();
     return 0;
