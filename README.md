@@ -1,12 +1,12 @@
 # Polaris GEM e2 Simulation and Path Tracking Controller
 
-This repository contains two main packages for ROS Noetic: `polaris_sim_utils` and `pt_controller`. These packages are designed to work together to provide utilities for the Polaris GEM e2 vehicle and to control its path tracking in a ROS environment.
+This repository contains two main packages for ROS Noetic: [polaris_sim_utils](./catkin_ws/src/polaris_sim_utils) and [pt_controller](./catkin_ws/src/pt_controller). These packages are designed to work together to provide utilities for the Polaris GEM e2 vehicle and to control its path tracking in a ROS environment. The main goal for this projec was develop the [pt_controller](./catkin_ws/src/pt_controller) package to control the Polaris GEM e2 vehicle to follow a predefined path.
 
 ![](./.media/polaris_gazebo.png)
 
 ## Polaris Simulation Utilities
 
-The `polaris_sim_utils` package contains utilities and tools to launch the Polaris GEM e2 vehicle and generate some helper paths to validate the controllers provided by the `pt_controller` package.
+The [polaris_sim_utils](./catkin_ws/src/polaris_sim_utils) package contains utilities and tools to launch the Polaris GEM e2 vehicle and generate some helper paths to validate the controllers provided by the [pt_controller](./catkin_ws/src/pt_controller) package.
 
 ### Features
 
@@ -97,7 +97,7 @@ PathTrackingPlanner planner(10.0, &controller, [&](PathTrackingState state){
 planner.execute();
 ```
 
-#### Design Choices
+## Design Choices
 
 - **Modular Design**: The simulation and control logic are separated into distinct packages (`polaris_sim_utils` for simulation utilities and `pt_controller` for path tracking). This makes the system more flexible and scalable for future developments.
   
@@ -169,7 +169,11 @@ roslaunch polaris_sim_utils pt_controller_gazebo.launch
 ./scripts_prod/run
 ```
 
-## Videos
+## Exporting to ROS2
+The [pt_controller](./catkin_ws/src/pt_controller) package can be exported to ROS2. It has written as a pure C++ package without any ROS1 dependencies, appart of ROS messages, with is compatible with ROS2.
+
+
+### Videos
 
 - **Path Tracking Controller in Action**: [Path Tracking Controller Video 1](https://www.youtube.com/watch?v=4YP2Vtt6SmI)
 
