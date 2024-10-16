@@ -108,7 +108,7 @@ For detailed installation instructions, please follow the steps provided in this
 
 **Launching the Simulation and Path Tracking Controller:**
 ```bash
-roslaunch polaris_sim_utils polaris_gazebo.launch
+roslaunch polaris_sim_utils pt_controller_gazebo.launch
 ```
 
 ### Dockerfile
