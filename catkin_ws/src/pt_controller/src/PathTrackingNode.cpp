@@ -27,17 +27,20 @@ public:
           path_tracking_planner_(
             frequency,
             &path_tracking_controller_,
-            std::bind(&PathTrackingNode::stateCallback, this, std::placeholders::_1))
+            std::bind(&PathTrackingNode::stateCallback, this, std::placeholders::_1)),
+            odom_topic_(odom_topic),
+            path_topic_(path_topic)
     {
-        path_sub_ = nh_.subscribe(path_topic, 10, &PathTrackingNode::pathCallback, this);
-        odom_sub_ = nh_.subscribe(odom_topic, 10, &PathTrackingNode::odomCallback, this);
-
         cmd_vel_pub_ = nh_.advertise<geometry_msgs::Twist>(cmd_vel_topic, 10);
         traveled_path_pub_ = nh_.advertise<nav_msgs::Path>(traveled_path_topic, 10);
 
         traveled_path_.header.frame_id = traveled_path_frame_id;
+    }
 
-        // TODO: Move this to a safe place
+    void startPlanner(){
+        path_sub_ = nh_.subscribe(path_topic_, 10, &PathTrackingNode::pathCallback, this);
+        odom_sub_ = nh_.subscribe(odom_topic_, 10, &PathTrackingNode::odomCallback, this);
+
         path_tracking_planner_.execute();
     }
 
@@ -90,6 +93,9 @@ private:
 
     PathTrackingController path_tracking_controller_;
     PathTrackingPlanner path_tracking_planner_;
+
+    std::string odom_topic_;
+    std::string path_topic_;
 };
 
 int main(int argc, char **argv)
@@ -177,6 +183,8 @@ int main(int argc, char **argv)
         max_angular_speed,
         goal_tolearance,
         frequency);
+
+    node.startPlanner();
 
     ros::spin();
     return 0;
