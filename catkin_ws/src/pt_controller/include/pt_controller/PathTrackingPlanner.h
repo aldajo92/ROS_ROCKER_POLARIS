@@ -9,7 +9,7 @@
 #include <iostream>
 #include <chrono>
 
-enum PathTrackingState
+enum class PathTrackingState
 {
     INIT,
     FOLLOW_PATH,
@@ -37,6 +37,7 @@ public:
 private:
     void stateMonitor();
     void updateState(PathTrackingState state);
+    PathTrackingState calculateNextState();
 
     std::atomic<bool> running_;
     std::thread planner_thread_;

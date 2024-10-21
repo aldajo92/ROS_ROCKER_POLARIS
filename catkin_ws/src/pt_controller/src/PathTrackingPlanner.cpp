@@ -1,12 +1,12 @@
 #include "pt_controller/PathTrackingPlanner.h"
 
 PathTrackingPlanner::PathTrackingPlanner(double frequency)
-    : current_state_(INIT), running_(false), frequency_(frequency), controller_(nullptr), state_callback_()
+    : current_state_(PathTrackingState::INIT), running_(false), frequency_(frequency), controller_(nullptr), state_callback_()
 {
 }
 
 PathTrackingPlanner::PathTrackingPlanner(double frequency, AbstractPathTrackingController *controller, PathTrackingStateCallback state_callback)
-    : current_state_(INIT), running_(false), frequency_(frequency), controller_(controller), state_callback_(state_callback)
+    : current_state_(PathTrackingState::INIT), running_(false), frequency_(frequency), controller_(controller), state_callback_(state_callback)
 {
 }
 
@@ -39,67 +39,88 @@ std::string PathTrackingPlanner::stateToString(PathTrackingState state) const
 {
     switch (state)
     {
-    case INIT:
+    case PathTrackingState::INIT:
         return "INIT";
-    case FOLLOW_PATH:
+    case PathTrackingState::FOLLOW_PATH:
         return "FOLLOW_PATH";
-    case NO_INPUT_DATA:
+    case PathTrackingState::NO_INPUT_DATA:
         return "NO_INPUT_DATA";
-    case WAITING_ODOM:
+    case PathTrackingState::WAITING_ODOM:
         return "WAITING_ODOM";
-    case WAITING_PATH:
+    case PathTrackingState::WAITING_PATH:
         return "WAITING_PATH";
-    case ERROR:
+    case PathTrackingState::ERROR:
         return "ERROR";
-    case SUCCESS_END_PATH:
+    case PathTrackingState::SUCCESS_END_PATH:
         return "SUCCESS_END_PATH";
     default:
         return "UNKNOWN";
     }
 }
 
+PathTrackingState PathTrackingPlanner::calculateNextState(){
+    if (!controller_->isOdomReceived() && !controller_->isPathReceived())
+    {
+        return PathTrackingState::NO_INPUT_DATA;
+    }
+
+    if (!controller_->isPathReceived() && controller_->isOdomReceived())
+    {
+        return PathTrackingState::WAITING_PATH;
+    }
+
+    if (!controller_->isOdomReceived() && controller_->isPathReceived())
+    {
+        return PathTrackingState::WAITING_ODOM;
+    }
+
+    if(controller_->isReachGoal()){
+        return PathTrackingState::SUCCESS_END_PATH;
+    }
+
+    return PathTrackingState::FOLLOW_PATH;
+}
+
 void PathTrackingPlanner::stateMonitor()
 {
-    updateState(INIT);
+    PathTrackingState current_state = PathTrackingState::INIT;
+    updateState(current_state);
 
     if (controller_ == nullptr)
     {
-        current_state_ = ERROR;
-        updateState(ERROR);
+        current_state = PathTrackingState::ERROR;
+        updateState(current_state);
     }
 
     while (running_.load() && controller_ != nullptr)
     {
+        current_state = calculateNextState();
+        updateState(current_state);
+
+        switch (current_state)
+        {
+            case PathTrackingState::INIT:
+                break;
+            case PathTrackingState::FOLLOW_PATH:
+                controller_->computeControlCommand();
+                break;
+            case PathTrackingState::NO_INPUT_DATA:
+                break;
+            case PathTrackingState::WAITING_ODOM:
+                break;
+            case PathTrackingState::WAITING_PATH:
+                break;
+            case PathTrackingState::ERROR:
+                break;
+            case PathTrackingState::SUCCESS_END_PATH:
+                controller_->stopRobot();
+                running_.store(false);
+                break;
+            default:
+                break;
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(1000 / frequency_)));
-
-        if (!controller_->isOdomReceived() && !controller_->isPathReceived())
-        {
-            updateState(NO_INPUT_DATA);
-            continue;
-        }
-
-        if (!controller_->isPathReceived() && controller_->isOdomReceived())
-        {
-            updateState(WAITING_PATH);
-            continue;
-        }
-
-        if (!controller_->isOdomReceived() && controller_->isPathReceived())
-        {
-            updateState(WAITING_ODOM);
-            continue;
-        }
-
-        updateState(FOLLOW_PATH);
-
-        controller_->computeControlCommand();
-
-        if (controller_->isReachGoal())
-        {
-            updateState(SUCCESS_END_PATH);
-            controller_->stopRobot();
-            running_.store(false);
-        }
     }
 }
 

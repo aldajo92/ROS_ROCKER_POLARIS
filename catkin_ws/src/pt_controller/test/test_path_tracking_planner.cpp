@@ -28,7 +28,7 @@ TEST(PathTrackingPlannerTest, InitialState)
     MockPathTrackingController mock_controller;
     PathTrackingPlanner planner(10.0, &mock_controller, nullptr);
 
-    EXPECT_EQ(planner.getState(), INIT);
+    EXPECT_EQ(planner.getState(), PathTrackingState::INIT);
 }
 
 TEST(PathTrackingPlannerTest, NoInputDataState)
@@ -43,7 +43,7 @@ TEST(PathTrackingPlannerTest, NoInputDataState)
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     planner.stop();
 
-    EXPECT_EQ(planner.getState(), NO_INPUT_DATA);
+    EXPECT_EQ(planner.getState(), PathTrackingState::NO_INPUT_DATA);
 }
 
 TEST(PathTrackingPlannerTest, WaitingPathState)
@@ -58,7 +58,7 @@ TEST(PathTrackingPlannerTest, WaitingPathState)
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     planner.stop();
 
-    EXPECT_EQ(planner.getState(), WAITING_PATH);
+    EXPECT_EQ(planner.getState(), PathTrackingState::WAITING_PATH);
 }
 
 TEST(PathTrackingPlannerTest, WaitingOdomState)
@@ -73,7 +73,7 @@ TEST(PathTrackingPlannerTest, WaitingOdomState)
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     planner.stop();
 
-    EXPECT_EQ(planner.getState(), WAITING_ODOM);
+    EXPECT_EQ(planner.getState(), PathTrackingState::WAITING_ODOM);
 }
 
 TEST(PathTrackingPlannerTest, FollowPathState)
@@ -88,7 +88,7 @@ TEST(PathTrackingPlannerTest, FollowPathState)
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     planner.stop();
 
-    EXPECT_EQ(planner.getState(), FOLLOW_PATH);
+    EXPECT_EQ(planner.getState(), PathTrackingState::FOLLOW_PATH);
 }
 
 TEST(PathTrackingPlannerTest, ReachGoalState)
@@ -104,7 +104,7 @@ TEST(PathTrackingPlannerTest, ReachGoalState)
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     planner.stop();
 
-    EXPECT_EQ(planner.getState(), SUCCESS_END_PATH);
+    EXPECT_EQ(planner.getState(), PathTrackingState::SUCCESS_END_PATH);
 }
 
 int main(int argc, char **argv)
