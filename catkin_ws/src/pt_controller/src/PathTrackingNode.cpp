@@ -83,12 +83,12 @@ public:
     }
 
 private:
-    ros::NodeHandle nh_; // remove or leave it?
+    ros::NodeHandle nh_;
     ros::Subscriber path_sub_;
     ros::Subscriber odom_sub_;
     ros::Publisher cmd_vel_pub_;
     ros::Publisher traveled_path_pub_;
-    nav_msgs::Odometry current_odometry_; // syncronized
+    nav_msgs::Odometry current_odometry_;
     nav_msgs::Path traveled_path_;
 
     PathTrackingController path_tracking_controller_;

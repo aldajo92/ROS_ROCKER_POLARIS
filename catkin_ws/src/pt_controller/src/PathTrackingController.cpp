@@ -21,25 +21,25 @@ PathTrackingController::PathTrackingController(
 
 void PathTrackingController::setPath(const nav_msgs::Path &path)
 {
-    if (!path_received_)
     {
+        std::lock_guard<std::mutex> lock(controller_mutex_); // Lock the mutex
         path_ = path;
         path_received_ = true;
+    }
 
-        if (!starting_point_set_ && !path_.poses.empty())
-        {
-            starting_point_ = path_.poses.front().pose.position;
-            starting_point_set_ = true;
-        }
+    if (!starting_point_set_ && !path_.poses.empty())
+    {
+        starting_point_ = path_.poses.front().pose.position;
+        starting_point_set_ = true;
     }
 }
 
 void PathTrackingController::setOdom(const nav_msgs::Odometry &odom)
 {
-    if (!path_received_)
     {
-        // ROS_WARN("No path to follow.");
-        return;
+        std::lock_guard<std::mutex> guard(controller_mutex_); // Lock the mutex
+        current_odometry_ = odom;
+        odom_received_ = true;
     }
 
     current_odometry_ = odom;
@@ -114,9 +114,19 @@ std::vector<double> PathTrackingController::computeControlAction(
 
 void PathTrackingController::computeControlCommand()
 {
-    double robot_x = current_odometry_.pose.pose.position.x;
-    double robot_y = current_odometry_.pose.pose.position.y;
-    double robot_yaw = getYawFromQuaternion(current_odometry_.pose.pose.orientation);
+
+    double robot_x;
+    double robot_y;
+    double robot_yaw;
+    nav_msgs::Path path;
+
+    {
+        std::lock_guard<std::mutex> guard(controller_mutex_);
+        robot_x = current_odometry_.pose.pose.position.x;
+        robot_y = current_odometry_.pose.pose.position.y;
+        robot_yaw = getYawFromQuaternion(current_odometry_.pose.pose.orientation);
+        path = path_;
+    }
 
     std::pair<double, int> min_distance_index = calculateMinDistanceInPath({robot_x, robot_y}, path_);
 
@@ -128,10 +138,10 @@ void PathTrackingController::computeControlCommand()
     double angle_diff;
     double distance;
 
-    for (size_t i = closest_point_index; i < path_.poses.size(); ++i)
+    for (size_t i = closest_point_index; i < path.poses.size(); ++i)
     {
-        double dx = path_.poses[i].pose.position.x - robot_x;
-        double dy = path_.poses[i].pose.position.y - robot_y;
+        double dx = path.poses[i].pose.position.x - robot_x;
+        double dy = path.poses[i].pose.position.y - robot_y;
         distance = hypot(dx, dy);
 
         if (distance >= lookahead_distance_)
@@ -144,7 +154,7 @@ void PathTrackingController::computeControlCommand()
             if (fabs(angle_diff) <= M_PI / 2)
             {
                 // The point is ahead of the robot
-                lookahead_point = path_.poses[i].pose.position;
+                lookahead_point = path.poses[i].pose.position;
                 lookahead_point_found = true;
                 break;
             }

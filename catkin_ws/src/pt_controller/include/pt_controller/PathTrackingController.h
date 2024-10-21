@@ -8,6 +8,7 @@
 #include <cmath>
 #include <functional>
 #include <chrono>
+#include <mutex>
 
 using ControllerActionCallback = std::function<void(double, double)>;
 
@@ -76,6 +77,8 @@ private:
 
     geometry_msgs::Point starting_point_;
     bool starting_point_set_;
+
+    std::mutex controller_mutex_;
 
     std::chrono::duration<double> log_interval_;
     std::chrono::time_point<std::chrono::system_clock> last_log_time_;
